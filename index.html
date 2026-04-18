@@ -15,6 +15,7 @@
       --dark: #111827;
       --white: #ffffff;
       --green: #047857;
+      --leaf: #166534;
     }
 
     * {
@@ -72,6 +73,47 @@
     ul {
       margin: 0;
       padding-left: 24px;
+    }
+
+    .brand-bar {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 28px;
+    }
+
+    .brand-logo {
+      width: 64px;
+      height: 64px;
+      border-radius: 8px;
+      object-fit: contain;
+      background: var(--white);
+      border: 1px solid var(--line);
+    }
+
+    .brand-name {
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--leaf);
+    }
+
+    .hero-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(220px, 340px);
+      align-items: center;
+      gap: 44px;
+      width: 100%;
+    }
+
+    .hero-content {
+      min-width: 0;
+    }
+
+    .mascot {
+      width: 100%;
+      max-width: 340px;
+      justify-self: end;
+      object-fit: contain;
     }
 
     .eyebrow {
@@ -187,6 +229,15 @@
         font-size: 18px;
       }
 
+      .hero-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .mascot {
+        max-width: 260px;
+        justify-self: start;
+      }
+
       .button {
         width: 100%;
       }
@@ -195,14 +246,25 @@
 </head>
 <body>
   <section>
-    <div class="eyebrow">Sorterama</div>
-    <h1>Plataforma digital para operar boloes com pagamento, rastreabilidade e automacao fiscal.</h1>
-    <p>
-      Uma experiencia simples para o cliente e uma operacao controlada para o negocio.
-    </p>
-    <div class="actions">
-      <a class="button" href="#documentos">Ver documentos</a>
-      <a class="button secondary" href="arquitetura.html">Produto e arquitetura</a>
+    <div class="hero-layout">
+      <div class="hero-content">
+        <div class="brand-bar">
+          <img class="brand-logo" src="assets/images/muiraquitan.jpg" alt="Logotipo Muiraquitan" />
+          <div>
+            <div class="eyebrow">Sorterama</div>
+            <div class="brand-name">Muiraquitan</div>
+          </div>
+        </div>
+        <h1>Plataforma digital para operar boloes com pagamento, rastreabilidade e automacao fiscal.</h1>
+        <p>
+          Uma experiencia simples para o cliente e uma operacao controlada para o negocio.
+        </p>
+        <div class="actions">
+          <a class="button" href="#documentos">Ver documentos</a>
+          <a class="button secondary" href="arquitetura.html">Produto e arquitetura</a>
+        </div>
+      </div>
+      <img class="mascot" src="assets/images/muri_feliz.png" alt="Muri, mascote do Sorterama" />
     </div>
   </section>
 

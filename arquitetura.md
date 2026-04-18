@@ -1,5 +1,10 @@
 # Sorterama - Produto e Arquitetura
 
+<p>
+  <img src="assets/images/muiraquitan.jpg" alt="Logotipo Muiraquitan" width="92" />
+  <img src="assets/images/muri_feliz.png" alt="Muri, mascote do Sorterama" width="180" />
+</p>
+
 Documento publico para investidores, parceiros e stakeholders.
 
 ## Visao Geral
@@ -81,7 +86,7 @@ No MVP, a emissao fiscal esta focada na taxa de administracao.
 
 Sorterama usa uma arquitetura modular, com separacao entre interface, regras de negocio, integracoes e persistencia.
 
-```mermaid
+<div class="mermaid">
 flowchart LR
     Cliente["Cliente"]
     Loja["Loja Web"]
@@ -103,7 +108,7 @@ flowchart LR
     Fila --> Fiscal
     Plataforma --> Comunicacao
     Plataforma --> Relatorios
-```
+</div>
 
 ## Principios Tecnicos
 
@@ -169,3 +174,8 @@ Sorterama combina tres elementos importantes:
 - uma base tecnica preparada para escalar processos financeiros e fiscais.
 
 O MVP busca provar que o ciclo completo de venda, pagamento, participacao, conciliacao e fiscalizacao pode operar de forma digital e confiavel.
+
+<script type="module">
+  import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs";
+  mermaid.initialize({ startOnLoad: true, theme: "default" });
+</script>

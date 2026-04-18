@@ -1,5 +1,10 @@
 # Sorterama - Plano de Testes do Software
 
+<p>
+  <img src="assets/images/muiraquitan.jpg" alt="Logotipo Muiraquitan" width="92" />
+  <img src="assets/images/muri_feliz.png" alt="Muri, mascote do Sorterama" width="180" />
+</p>
+
 Data: abril de 2026.
 
 Este documento unifica a estrategia de testes, o runbook manual e o roteiro ponta a ponta do MVP.
