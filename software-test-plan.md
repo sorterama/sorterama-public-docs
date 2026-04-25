@@ -1,11 +1,7 @@
 # Sorterama - Plano de Testes do Software
 
-<p>
-  <img src="assets/images/muiraquitan.jpg" alt="Logotipo Muiraquitan" width="92" />
-  <img src="assets/images/muri_feliz.png" alt="Muri, mascote do Sorterama" width="180" />
-</p>
-
 Data: abril de 2026.
+Ultima revisao: 25/04/2026.
 
 Este documento unifica a estrategia de testes, o runbook manual e o roteiro ponta a ponta do MVP.
 
@@ -16,6 +12,7 @@ Validar o Sorterama antes da homologacao ampliada e criar uma base minima de seg
 O plano cobre:
 
 - onboarding e login;
+- login por codigo;
 - loja publica;
 - carrinho e checkout Pix;
 - confirmacao de pagamento;
@@ -69,12 +66,12 @@ Nao executar roteiro completo em producao. Usar apenas smoke tests controlados, 
 
 | Perfil | Uso no teste |
 | --- | --- |
-| Cliente novo | Criar conta, comprar e acompanhar pedido |
-| Cliente existente | Validar login e nova compra |
+| Cliente novo | Criar conta, validar codigo, concluir cadastro, comprar e acompanhar pedido |
+| Cliente existente | Validar login com senha, login por codigo e nova compra |
 | Publisher | Criar produtos, concursos e boloes |
 | Approver | Aprovar/publicar produtos e boloes |
-| Support | Consultar pedidos e processar rotinas |
-| Administrator | Acessar financeiro, conciliacao e relatorios |
+| Support | Consultar pedidos, clientes e status operacionais no backoffice |
+| Administrator | Acessar financeiro, conciliacao, relatorios e rotinas administrativas |
 
 ## Dados de Teste
 
@@ -156,19 +153,48 @@ Passos:
 
 1. Abrir loja publica.
 2. Iniciar cadastro.
-3. Informar e-mail novo.
-4. Preencher dados obrigatorios.
-5. Submeter cadastro.
-6. Fazer login.
-7. Sair da conta.
-8. Fazer login novamente.
+3. Preencher nome, CPF, data de nascimento, e-mail, confirmacao de e-mail, telefone e WhatsApp.
+4. Solicitar codigo principal via WhatsApp/SMS.
+5. Validar se a expiracao do codigo aparece em horario do Brasil.
+6. Se necessario, solicitar codigo por e-mail como fallback.
+7. Informar o codigo recebido e confirmar a validacao.
+8. Preencher endereco.
+9. Definir senha e confirmar senha.
+10. Aceitar termos obrigatorios.
+11. Submeter cadastro.
+12. Validar tela de sucesso.
+13. Confirmar recebimento do e-mail de boas-vindas sem link de confirmacao e com mensagem "Bem-vindo(a) a Sorterama!".
+14. Fazer login com senha.
+15. Sair da conta.
+16. Fazer login por codigo.
+17. Validar preservacao de carrinho, se existir carrinho anonimo aberto.
 
 Resultado esperado:
 
 - cadastro conclui sem erro;
-- campos obrigatorios sao validados;
-- opcionais nao bloqueiam conclusao;
-- login e logout funcionam.
+- campos obrigatorios sao validados por etapa;
+- fallback por e-mail funciona quando habilitado;
+- horario exibido para o codigo reflete o horario local do Brasil;
+- e-mail de boas-vindas nao traz link de confirmacao;
+- login e logout funcionam;
+- login por codigo funciona com CPF ou e-mail, conforme cadastro do cliente.
+
+### Cenario 1B - Falhas de Onboarding e Recuperacao
+
+Passos:
+
+1. Solicitar codigo e informar codigo invalido.
+2. Solicitar novo codigo e informar codigo expirado.
+3. Tentar concluir cadastro sem validar codigo.
+4. Tentar concluir cadastro sem aceitar um dos termos.
+5. Corrigir os erros e reenviar.
+
+Resultado esperado:
+
+- mensagens de erro sao claras;
+- o usuario permanece na etapa correta;
+- a validacao do codigo bloqueia a conclusao do cadastro;
+- a recuperacao do fluxo nao exige recomecar o onboarding do zero.
 
 ### Cenario 2 - Publicacao de Oferta Avulsa
 
@@ -269,13 +295,14 @@ Resultado esperado:
 
 Passos:
 
-1. Abrir lista de pedidos.
-2. Localizar pedido pendente.
-3. Abrir detalhe.
-4. Conferir cliente, itens, pagamento e valores.
-5. Confirmar pagamento.
-6. Atualizar detalhe.
-7. Validar status pago e participacoes.
+1. Entrar no backoffice como `Support`.
+2. Abrir lista de pedidos.
+3. Localizar pedido pendente.
+4. Abrir detalhe.
+5. Conferir cliente, itens, pagamento e valores.
+6. Consultar historico operacional disponivel.
+7. Atualizar a tela apos confirmacao do pagamento.
+8. Validar status pago e participacoes.
 
 Resultado esperado:
 
@@ -283,6 +310,25 @@ Resultado esperado:
 - detalhe mostra composicao financeira;
 - status acompanha webhook;
 - contexto permite auditar cliente, pedido, pagamento e participacao.
+
+### Cenario 6B - Rotina de Publisher e Approver
+
+Passos:
+
+1. Entrar como `Publisher`.
+2. Criar ou editar produto.
+3. Criar ou editar concurso.
+4. Criar ou editar pool.
+5. Submeter para aprovacao.
+6. Entrar como `Approver`.
+7. Aprovar o cadastro.
+8. Conferir reflexo na loja publica.
+
+Resultado esperado:
+
+- cada perfil enxerga apenas o que precisa para sua funcao;
+- a aprovacao muda o estado da oferta;
+- a loja passa a refletir a publicacao sem inconsistencias visiveis.
 
 ### Cenario 7 - Dashboard Financeiro
 
@@ -337,10 +383,14 @@ Resultado esperado:
 
 Passos:
 
-1. Gerar compra pendente.
-2. Confirmar pagamento.
-3. Emitir ou simular emissao de NFS-e.
-4. Validar notificacoes para:
+1. Concluir onboarding.
+2. Validar e-mail de boas-vindas.
+3. Gerar compra pendente.
+4. Confirmar pagamento.
+5. Emitir ou simular emissao de NFS-e.
+6. Validar notificacoes para:
+   - codigo de onboarding por e-mail, quando usado;
+   - boas-vindas ao concluir cadastro;
    - compra confirmada;
    - nota fiscal emitida;
    - resultado, se implementado.
@@ -349,7 +399,33 @@ Resultado esperado:
 
 - notificacoes sao criadas/enviadas no contexto correto;
 - nao ha duplicidade para o mesmo evento;
+- e-mail de boas-vindas reflete o layout vigente, sem link de confirmacao;
 - SMS nao e obrigatorio para NFS-e no MVP.
+
+## Roteiro Especifico por Tipo de Usuario
+
+### Roteiro do cliente
+
+1. iniciar onboarding
+2. validar codigo
+3. concluir cadastro
+4. receber boas-vindas
+5. fazer login com senha
+6. fazer login por codigo
+7. adicionar item ao carrinho
+8. gerar Pix
+9. confirmar pedido pago
+10. acessar historico do cliente
+
+### Roteiro do time de backoffice
+
+1. entrar com perfil correto
+2. validar menus permitidos para o perfil
+3. criar ou revisar produto, concurso e pool
+4. aprovar publicacao
+5. localizar pedido no suporte
+6. validar dashboards financeiro e fiscal
+7. exportar relatorios quando aplicavel
 
 ### Cenario 10 - Permissoes e Regressao Visual
 
@@ -438,10 +514,12 @@ Observacoes:
 ## Criterios de Aceite do MVP
 
 - Onboarding de cliente novo passa.
+- Verificacao por codigo do onboarding passa em horario do Brasil.
 - Produto avulso aparece na loja.
 - Checkout gera pedido e Pix.
 - Pagamento confirma pedido e cria participacao.
 - Replay do webhook nao duplica efeitos.
+- Login por codigo funciona para cliente existente.
 - Produto mensal gera cobranca unica do pacote.
 - Backoffice cria, aprova e publica produto/pool.
 - Dashboard financeiro reconcilia valores do ledger.

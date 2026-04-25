@@ -1,11 +1,8 @@
 # Sorterama - Produto e Arquitetura
 
-<p>
-  <img src="assets/images/muiraquitan.jpg" alt="Logotipo Muiraquitan" width="92" />
-  <img src="assets/images/muri_feliz.png" alt="Muri, mascote do Sorterama" width="180" />
-</p>
-
 Documento publico para investidores, parceiros e stakeholders.
+
+Ultima revisao: 25/04/2026.
 
 ## Visao Geral
 
@@ -31,14 +28,15 @@ Esses pontos limitam crescimento, confianca e capacidade de auditoria.
 Sorterama centraliza o ciclo de vida da venda:
 
 1. publicacao de ofertas;
-2. cadastro e login do cliente;
-3. compra de cotas ou pacotes;
-4. pagamento Pix;
-5. confirmacao automatica;
-6. registro financeiro;
-7. emissao fiscal da taxa de administracao;
-8. notificacao ao cliente;
-9. acompanhamento pelo backoffice.
+2. cadastro com validacao de contato;
+3. login do cliente com senha ou codigo;
+4. compra de cotas ou pacotes;
+5. pagamento Pix;
+6. confirmacao automatica;
+7. registro financeiro;
+8. emissao fiscal da taxa de administracao;
+9. notificacao ao cliente;
+10. acompanhamento pelo backoffice.
 
 O objetivo do MVP e validar o ciclo completo com seguranca operacional antes de ampliar volume, canais comerciais e automacoes.
 
@@ -48,6 +46,8 @@ O cliente acessa a loja, escolhe uma oferta, realiza o pagamento por Pix e acomp
 
 Fluxos principais:
 
+- onboarding guiado com verificacao por telefone e opcao de fallback por e-mail;
+- login com senha ou login por codigo;
 - compra avulsa de cota;
 - pacote mensal com mais de um bolao incluido;
 - acompanhamento do pedido;
@@ -64,9 +64,21 @@ Capacidades previstas no MVP:
 - cadastro de concursos e boloes;
 - aprovacao de ofertas;
 - consulta de clientes e pedidos;
+- acompanhamento de onboarding, autenticacao e status operacionais;
 - acompanhamento financeiro;
 - conciliacao entre pedido, pagamento, ledger e nota fiscal;
 - exportacao CSV para apoio fiscal e contabil.
+
+## Diferenciais Operacionais do MVP
+
+Mesmo em fase inicial, o produto ja foi desenhado para reduzir atrito operacional em pontos que costumam travar o crescimento:
+
+- validacao de contato antes da conclusao do cadastro;
+- login por codigo para reduzir barreira de acesso;
+- pagamento Pix com confirmacao automatica;
+- separacao financeira entre cota e taxa de administracao;
+- retaguarda administrativa para publicacao, suporte e conciliacao;
+- emissao fiscal desacoplada do momento da compra.
 
 ## Modelo Financeiro
 
@@ -86,7 +98,7 @@ No MVP, a emissao fiscal esta focada na taxa de administracao.
 
 Sorterama usa uma arquitetura modular, com separacao entre interface, regras de negocio, integracoes e persistencia.
 
-<div class="mermaid">
+```mermaid
 flowchart LR
     Cliente["Cliente"]
     Loja["Loja Web"]
@@ -108,12 +120,24 @@ flowchart LR
     Fila --> Fiscal
     Plataforma --> Comunicacao
     Plataforma --> Relatorios
-</div>
+```
+
+## Integracoes Externas
+
+No MVP, as integracoes relevantes sao:
+
+- OpenPix/Woovi para pagamento Pix;
+- SendGrid para e-mails transacionais;
+- Zenvia para SMS e WhatsApp;
+- Focus NFe para emissao de nota fiscal de servico;
+- PostgreSQL, Redis e RabbitMQ como base operacional.
+
+Essas integracoes ficam encapsuladas, o que facilita substituicao de provider e reduz acoplamento do produto a fornecedores especificos.
 
 ## Principios Tecnicos
 
 - Separacao clara entre produto, dominio, infraestrutura e interfaces.
-- Processos criticos assincromos para evitar bloquear o cliente.
+- Processos criticos assincronos para evitar bloquear o cliente.
 - Integracoes externas encapsuladas por adapters.
 - Rastreabilidade de pedidos, pagamentos e notas fiscais.
 - Base preparada para automacao operacional e analise de dados.
@@ -126,6 +150,8 @@ Fluxos que dependem de provedores externos sao tratados de forma resiliente.
 Exemplo: a confirmacao de pagamento nao precisa esperar a emissao fiscal. A nota fiscal pode ser processada em segundo plano, com status acompanhado pelo backoffice.
 
 Isso reduz impacto para o cliente e permite que a operacao trate pendencias sem perder rastreabilidade.
+
+Da mesma forma, fluxos de comunicacao e validacao de contato podem seguir por canais alternativos, reduzindo dependencia de um unico meio.
 
 ## Dados e Relatorios
 
@@ -153,6 +179,17 @@ Objetivos:
 
 Em fases futuras, a observabilidade pode evoluir para dashboards operacionais, alertas automaticos e analise de funil.
 
+## Estagio Atual do MVP
+
+Na revisao atual, o produto ja demonstra:
+
+- onboarding funcional com verificacao de contato;
+- login por codigo em funcionamento;
+- checkout Pix com geracao de chave copia e cola;
+- backoffice para operacao e publicacao;
+- trilha financeira e fiscal desacoplada;
+- documentacao tecnica, plano de testes e guia de setup local para acelerar time e homologacao.
+
 ## Evolucao Esperada
 
 Apos homologacao, os proximos vetores naturais de evolucao sao:
@@ -174,8 +211,3 @@ Sorterama combina tres elementos importantes:
 - uma base tecnica preparada para escalar processos financeiros e fiscais.
 
 O MVP busca provar que o ciclo completo de venda, pagamento, participacao, conciliacao e fiscalizacao pode operar de forma digital e confiavel.
-
-<script type="module">
-  import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs";
-  mermaid.initialize({ startOnLoad: true, theme: "default" });
-</script>
