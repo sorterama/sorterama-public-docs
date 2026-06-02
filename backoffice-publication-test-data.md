@@ -121,7 +121,7 @@ O ciclo minimo de publicacao e:
 
 ## Fluxograma da Publicacao
 
-```mermaid
+<pre class="mermaid">
 flowchart TD
     A["Inicio"] --> B["Publisher cria produto"]
     B --> C{"Tipo de oferta"}
@@ -156,7 +156,17 @@ flowchart TD
     AC -->|Nao| AD["Corrigir cadastro ou status"]
     AC -->|Sim| AE["Oferta exibida na loja"]
     AD --> X
-```
+</pre>
+
+<script type="module">
+  import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
+
+  mermaid.initialize({
+    startOnLoad: true,
+    securityLevel: "strict",
+    theme: "default"
+  });
+</script>
 
 ## Regras de Negocio da Publicacao
 
