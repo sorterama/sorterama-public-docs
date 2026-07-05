@@ -1,13 +1,12 @@
-# Sorterama - Produto e Arquitetura
+---
+title: Sorterama - Produto e Arquitetura
+---
 
-<p>
-  <img src="assets/images/muiraquitan.jpg" alt="Logotipo Muiraquitan" width="92" />
-  <img src="assets/images/muri_feliz.png" alt="Muri, mascote do Sorterama" width="180" />
-</p>
+# Sorterama - Produto e Arquitetura
 
 Documento publico para investidores, parceiros e stakeholders.
 
-Ultima revisao: 25/04/2026.
+Ultima revisao: 05/07/2026.
 
 ## Visao Geral
 
@@ -41,7 +40,8 @@ Sorterama centraliza o ciclo de vida da venda:
 7. registro financeiro;
 8. emissao fiscal da taxa de administracao;
 9. notificacao ao cliente;
-10. acompanhamento pelo backoffice.
+10. publicacao de resultados e premiacoes;
+11. acompanhamento pelo backoffice.
 
 O objetivo do MVP e validar o ciclo completo com seguranca operacional antes de ampliar volume, canais comerciais e automacoes.
 
@@ -56,6 +56,7 @@ Fluxos principais:
 - compra avulsa de cota;
 - pacote mensal com mais de um bolao incluido;
 - acompanhamento do pedido;
+- consulta publica de resultados, boloes conferidos e premiacoes;
 - acesso a informacoes fiscais quando aplicavel;
 - recebimento de comunicacoes transacionais.
 
@@ -67,7 +68,9 @@ Capacidades previstas no MVP:
 
 - cadastro e publicacao de produtos;
 - cadastro de concursos e boloes;
+- geracao em lote de concursos e boloes do proximo mes;
 - aprovacao de ofertas;
+- cadastro de resultado, conferencia dos jogos, registro de premiacao e publicacao publica;
 - consulta de clientes e pedidos;
 - acompanhamento de onboarding, autenticacao e status operacionais;
 - acompanhamento financeiro;
@@ -83,6 +86,8 @@ Mesmo em fase inicial, o produto ja foi desenhado para reduzir atrito operaciona
 - pagamento Pix com confirmacao automatica;
 - separacao financeira entre cota e taxa de administracao;
 - retaguarda administrativa para publicacao, suporte e conciliacao;
+- publicacao de resultados com controle do que fica publico;
+- conferencia e premiacao desacopladas da venda, reduzindo operacao manual;
 - emissao fiscal desacoplada do momento da compra.
 
 ## Modelo Financeiro
@@ -103,7 +108,7 @@ No MVP, a emissao fiscal esta focada na taxa de administracao.
 
 Sorterama usa uma arquitetura modular, com separacao entre interface, regras de negocio, integracoes e persistencia.
 
-<div class="mermaid">
+```mermaid
 flowchart LR
     Cliente["Cliente"]
     Loja["Loja Web"]
@@ -115,6 +120,7 @@ flowchart LR
     Fiscal["Emissao Fiscal"]
     Comunicacao["E-mail e Notificacoes"]
     Relatorios["Relatorios e Conciliacao"]
+    Resultados["Resultados Publicos"]
 
     Cliente --> Loja
     Loja --> Plataforma
@@ -125,7 +131,9 @@ flowchart LR
     Fila --> Fiscal
     Plataforma --> Comunicacao
     Plataforma --> Relatorios
-</div>
+    Plataforma --> Resultados
+    Resultados --> Loja
+```
 
 ## Integracoes Externas
 
@@ -171,6 +179,20 @@ A plataforma registra eventos financeiros em uma base interna de ledger, permiti
 
 Com o produto homologado, essa base pode evoluir para relatorios mensais de operacao, indicadores de crescimento e materiais para investidores.
 
+## Resultados e Transparencia
+
+A publicacao de resultados passa a ser um eixo de confianca do produto. O backoffice permite registrar o resultado oficial, conferir os boloes, registrar premiacoes e controlar quando essa informacao sera exibida publicamente.
+
+Para o cliente e para o visitante, a loja pode exibir:
+
+- ultimos resultados publicados;
+- resumo de concursos e boloes conferidos;
+- boloes premiados;
+- valor total de premiacoes registradas;
+- pagina publica de resultados com filtros por modalidade, concurso, periodo e status.
+
+Esse desenho melhora a transparencia sem expor informacoes sensiveis de clientes, pedidos ou pagamentos.
+
 ## Observabilidade
 
 O MVP ja considera logs e rastreabilidade como parte da operacao.
@@ -192,6 +214,8 @@ Na revisao atual, o produto ja demonstra:
 - login por codigo em funcionamento;
 - checkout Pix com geracao de chave copia e cola;
 - backoffice para operacao e publicacao;
+- geracao em lote de boloes e concursos;
+- fluxo operacional de resultado, conferencia, premiacao e publicacao publica;
 - trilha financeira e fiscal desacoplada;
 - documentacao tecnica, plano de testes e guia de setup local para acelerar time e homologacao.
 
@@ -216,8 +240,3 @@ Sorterama combina tres elementos importantes:
 - uma base tecnica preparada para escalar processos financeiros e fiscais.
 
 O MVP busca provar que o ciclo completo de venda, pagamento, participacao, conciliacao e fiscalizacao pode operar de forma digital e confiavel.
-
-<script type="module">
-  import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs";
-  mermaid.initialize({ startOnLoad: true, theme: "default" });
-</script>

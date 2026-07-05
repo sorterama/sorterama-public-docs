@@ -1,7 +1,12 @@
+---
+title: Massa de Testes - Publicacao de Boloes no Backoffice
+---
+
 # Massa de Testes - Publicacao de Boloes no Backoffice
 
 Data: abril de 2026.
-Escopo: cadastro e publicacao de `BolaoProduct`, `LotteryContest` e `Pool`.
+Ultima revisao: 05/07/2026.
+Escopo: cadastro manual, geracao em lote, publicacao de `BolaoProduct`, `LotteryContest`, `Pool` e publicacao publica de resultados.
 
 Este roteiro complementa `software-test-plan.md` com uma massa controlada, reproduzivel e limitada aos tipos:
 
@@ -28,9 +33,11 @@ Este documento tambem funciona como uma primeira aproximacao de especificacao fu
 
 - produtos podem ser criados e preparados para venda;
 - concursos podem ser cadastrados e abertos para vendas;
+- concursos e boloes podem ser gerados em lote para o proximo mes;
 - pools podem ser vinculados a produto e concurso;
 - o fluxo publisher/approver controla a publicacao;
-- a loja publica exibe apenas ofertas coerentes e vendaveis.
+- a loja publica exibe apenas ofertas coerentes e vendaveis;
+- resultados podem ser cadastrados, conferidos, premiados e publicados publicamente.
 
 ## Features
 
@@ -95,6 +102,36 @@ A loja publica passa a exibir a oferta apenas quando o conjunto produto + concur
 - janela de venda ativa;
 - cotas disponiveis.
 
+### Feature 6 - Geracao em lote de boloes
+
+Permite gerar concursos e boloes futuros a partir de modelos configuraveis, reduzindo trabalho manual recorrente.
+
+**Inclui:**
+
+- modelos por loteria;
+- quantidade de cotas;
+- valor da cota;
+- taxa administrativa;
+- dias da semana dos sorteios;
+- ativo/inativo;
+- proximo numero de concurso;
+- geracao de bolao mensal da Mega-Sena;
+- idempotencia por periodo/concurso.
+
+### Feature 7 - Resultado, conferencia e premiacao
+
+Permite registrar o resultado oficial, conferir jogos dos boloes, registrar premiacoes e publicar informacoes para clientes e visitantes.
+
+**Inclui:**
+
+- cadastro de resultado oficial;
+- conferencia dos jogos por bolao;
+- registro de faixas de premiacao;
+- calculo de premio por cota;
+- notificacoes quando aplicavel;
+- controle de publicacao publica;
+- pagina publica de resultados.
+
 ## Objetivo
 
 Validar o fluxo operacional do backoffice para publicar ofertas vendaveis na loja publica, cobrindo dominios validos, bordas e falhas esperadas dos campos principais.
@@ -110,6 +147,26 @@ O ciclo minimo de publicacao e:
 7. Approver publica produto e bolao.
 8. Loja publica lista a oferta quando produto, concurso e bolao estao coerentes.
 
+O ciclo minimo de geracao em lote e:
+
+1. Administrator revisa modelos de geracao.
+2. Administrator executa "Gerar Boloes do Proximo Mes".
+3. Sistema calcula concursos futuros conforme loteria e dias da semana.
+4. Sistema cria concursos e boloes futuros ausentes.
+5. Sistema cria bolao mensal da Mega-Sena, quando o modelo estiver ativo.
+6. Operador revisa os registros gerados.
+7. Publisher/Approver segue o fluxo normal de aprovacao e publicacao.
+
+O ciclo minimo de publicacao de resultado e:
+
+1. Operador cadastra resultado oficial do concurso.
+2. Operador executa conferencia dos jogos vinculados aos boloes.
+3. Operador registra premiacao, quando houver premio.
+4. Sistema calcula premio total e premio por cota.
+5. Operador revisa os dados.
+6. Operador marca o resultado como publico.
+7. Loja publica exibe o resultado em `/Resultados` e nos resumos da home.
+
 ## Atores
 
 | Ator | Responsabilidade principal |
@@ -117,11 +174,12 @@ O ciclo minimo de publicacao e:
 | `Publisher` | cadastrar produto, concurso e bolao; enviar produto e bolao para aprovacao |
 | `Approver` | revisar, aprovar, rejeitar e publicar produto e bolao; abrir concurso para vendas |
 | `Administrator` | acompanhar operacao, destravar inconsistencias e auditar status |
+| `ResultOperator` ou operador autorizado | cadastrar resultado, conferir jogos, registrar premiacao e publicar resultado |
 | `Cliente final` | visualizar e comprar apenas ofertas publicadas e vendaveis |
 
 ## Fluxograma da Publicacao
 
-<pre class="mermaid">
+```mermaid
 flowchart TD
     A["Inicio"] --> B["Publisher cria produto"]
     B --> C{"Tipo de oferta"}
@@ -156,17 +214,44 @@ flowchart TD
     AC -->|Nao| AD["Corrigir cadastro ou status"]
     AC -->|Sim| AE["Oferta exibida na loja"]
     AD --> X
-</pre>
+```
 
-<script type="module">
-  import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
+## Fluxograma da Geracao em Lote
 
-  mermaid.initialize({
-    startOnLoad: true,
-    securityLevel: "strict",
-    theme: "default"
-  });
-</script>
+```mermaid
+flowchart TD
+    A["Administrator abre Geracao de Boloes"] --> B["Revisa modelos ativos"]
+    B --> C["Executa Gerar Boloes do Proximo Mes"]
+    C --> D["Sistema calcula datas por loteria"]
+    D --> E["Cria concursos ausentes"]
+    E --> F["Cria boloes avulsos ausentes"]
+    F --> G{"Modelo mensal ativo?"}
+    G -->|Sim| H["Cria bolao mensal Mega-Sena da competencia"]
+    G -->|Nao| I["Finaliza geracao"]
+    H --> I
+    I --> J["Operador revisa registros gerados"]
+    J --> K["Ajusta premio, acumulado, cotas, valores e status"]
+    K --> L["Segue fluxo de aprovacao/publicacao"]
+```
+
+## Fluxograma da Publicacao de Resultados
+
+```mermaid
+flowchart TD
+    A["Concurso realizado"] --> B["Operador cadastra resultado oficial"]
+    B --> C["Executa conferencia dos jogos"]
+    C --> D{"Bolao premiado?"}
+    D -->|Nao| E["Status: Nao premiado"]
+    D -->|Sim| F["Registra faixas e valores"]
+    F --> G["Calcula premio por cota"]
+    E --> H["Revisao operacional"]
+    G --> H
+    H --> I{"Publicar resultado?"}
+    I -->|Nao| J["Resultado fica interno"]
+    I -->|Sim| K["Resultado fica publico"]
+    K --> L["Loja exibe em /Resultados"]
+    K --> M["Home atualiza resumo e ultimos resultados"]
+```
 
 ## Regras de Negocio da Publicacao
 
@@ -186,6 +271,36 @@ No caso de pacote mensal:
 - a cobranca e unica para o pacote;
 - a distribuicao operacional depende dos pools incluidos e vendaveis.
 
+## Regras de Negocio da Geracao em Lote
+
+- a geracao deve ser idempotente;
+- nao deve criar dois concursos para a mesma loteria e numero;
+- nao deve criar dois boloes para o mesmo produto e concurso;
+- modelos inativos nao geram registros;
+- todas as loterias iniciam com 50 cotas por padrao, salvo configuracao diferente;
+- valores padrao devem vir do modelo editavel no backoffice;
+- registros futuros podem ser editados antes da publicacao;
+- bolao mensal da Mega-Sena representa a competencia e inclui os concursos da Mega-Sena do periodo.
+
+Calendario inicial:
+
+| Loteria | Dias de geracao |
+| --- | --- |
+| Mega-Sena | Terca, quinta e sabado |
+| Lotofacil | Segunda, terca, quarta, quinta, sexta e sabado |
+| Quina | Segunda, terca, quarta, quinta, sexta e sabado |
+
+## Regras de Negocio da Publicacao de Resultados
+
+- apenas concursos com resultado cadastrado podem ser exibidos como resultado;
+- resultado publico depende de flag explicita de publicacao;
+- resultado oculto nao deve aparecer na loja nem na API publica;
+- conferencia de bolao deve preservar status operacional interno;
+- bolao sem conferencia aparece publicamente como "Aguardando conferencia", se o resultado estiver publico;
+- premiacao registrada deve informar premio total e premio por cota;
+- nao expor dados de cliente, pedido, CPF, e-mail, telefone, pagamento ou documento fiscal na pagina publica;
+- observacao publica deve ser opcional e separada das observacoes internas.
+
 ## Criterios Funcionais para Desenvolvimento e Teste
 
 Ao evoluir esta funcionalidade, desenvolvimento e QA devem validar pelo menos:
@@ -195,7 +310,9 @@ Ao evoluir esta funcionalidade, desenvolvimento e QA devem validar pelo menos:
 3. exibicao correta na loja publica;
 4. comportamento de produto mensal versus avulso;
 5. mensagens de erro e bloqueios operacionais;
-6. preservacao da rastreabilidade entre produto, concurso e bolao.
+6. preservacao da rastreabilidade entre produto, concurso e bolao;
+7. idempotencia da geracao em lote;
+8. publicacao publica de resultados sem exposicao de dados sensiveis.
 
 ## Estado Inicial Recomendado
 
@@ -313,6 +430,24 @@ Resultado esperado:
 - catalogo publico exibe os tres produtos;
 - detalhe do produto mostra o pool publicado e disponivel.
 
+## Massa de Geracao em Lote
+
+Executar a partir da tela de geracao usando a competencia do proximo mes.
+
+| Caso | Modelo | Loteria | Dias esperados | Cotas | Cota | Taxa | Resultado esperado |
+| --- | --- | --- | --- | ---: | ---: | ---: | --- |
+| GB-001 | Bolao por concurso | Mega-Sena | Terca, quinta, sabado | 50 | 17.90 | 2.00 | 12 a 14 concursos/boloes |
+| GB-002 | Bolao por concurso | Lotofacil | Segunda a sabado | 50 | 13.90 | 2.00 | 24 a 27 concursos/boloes |
+| GB-003 | Bolao por concurso | Quina | Segunda a sabado | 50 | 15.90 | 2.00 | 24 a 27 concursos/boloes |
+| GB-004 | Bolao mensal | Mega-Sena | Todos da competencia | 50 | configurado | configurado | 1 bolao mensal |
+
+Resultado esperado:
+
+- concursos e boloes futuros sao criados;
+- nenhum registro e duplicado ao reexecutar a geracao;
+- modelos inativos nao geram registros;
+- registros podem ser editados antes da publicacao.
+
 ## Massa de Pacote Mensal
 
 Cria um produto mensal com pools incluidos explicitamente. Use os concursos da massa base ou concursos adicionais da mesma loteria.
@@ -375,6 +510,24 @@ Use estes numeros ao cadastrar jogos manuais no pool, quando o teste incluir con
 | Lotofacil | `01 02 03 04 05 06 07 08 09 10 11 12 13 14 15` | `02 04 06 08 10 12 14 16 18 20 22 24 25 03 05` | `01 02 03 04 05 06 07 08 09 10 11 12 13 14 15` |
 | Quina | `05 17 29 43 71` | `01 12 25 50 80` | `05 17 29 43 71` |
 
+## Massa de Resultado e Premiacao
+
+Use os jogos operacionais acima para cadastrar resultado e validar conferencia.
+
+| Caso | Tipo | Concurso | Resultado | Status esperado | Premiacao |
+| --- | --- | ---: | --- | --- | ---: |
+| RS-001 | Mega-Sena | concurso da massa BP-001 | `04 12 23 33 45 56` | Premiado | informar faixa Sena |
+| RS-002 | Lotofacil | concurso da massa BP-002 | `01 02 03 04 05 06 07 08 09 10 11 12 13 14 15` | Premiado | informar faixa 15 pontos |
+| RS-003 | Quina | concurso da massa BP-003 | `10 20 30 40 50` | Nao premiado ou aguardando ajuste | sem premio |
+
+Resultado esperado:
+
+- resultado oficial e salvo;
+- conferencia identifica acertos por bolao;
+- premiacao calcula valor total e valor por cota;
+- resultado so aparece publicamente apos publicacao explicita;
+- observacao publica aparece em `/Resultados` quando preenchida.
+
 ## Checklist de Execucao por Rodada
 
 ```text
@@ -402,6 +555,19 @@ Pools incluidos:
 Resultado catalogo publico:
 Resultado checkout:
 Resultado publicacao:
+
+Geracao em lote executada:
+Competencia gerada:
+Concursos gerados:
+Boloes avulsos gerados:
+Bolao mensal gerado:
+Reexecucao idempotente:
+
+Resultado ID:
+PoolResult IDs:
+Premiacao registrada:
+Resultado publicado publicamente:
+Resultado visivel em /Resultados:
 Observacoes:
 ```
 
@@ -412,6 +578,10 @@ A massa e considerada aprovada quando:
 - os tres produtos avulsos sao publicados;
 - os tres pools ficam publicados e dentro da janela de venda;
 - os concursos associados ficam `OpenForSales`;
+- a geracao em lote cria registros futuros sem duplicidade;
+- o bolao mensal da Mega-Sena e criado quando o modelo estiver ativo;
+- resultado oficial pode ser cadastrado e conferido;
+- resultado publico aparece na loja apenas quando marcado como publico;
 - a loja publica exibe Mega-Sena, Lotofacil e Quina;
 - os casos negativos bloqueiam os dados invalidos sem criar registros inconsistentes;
 - IDs e evidencias da rodada foram registrados.

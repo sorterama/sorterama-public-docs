@@ -1,7 +1,11 @@
+---
+title: Sorterama - Plano de Testes do Software
+---
+
 # Sorterama - Plano de Testes do Software
 
 Data: abril de 2026.
-Ultima revisao: 25/04/2026.
+Ultima revisao: 05/07/2026.
 
 Este documento unifica a estrategia de testes, o runbook manual e o roteiro ponta a ponta do MVP.
 
@@ -19,6 +23,8 @@ O plano cobre:
 - idempotencia;
 - assinatura/pacote mensal;
 - backoffice operacional;
+- geracao em lote de concursos e boloes;
+- resultado, conferencia, premiacao e publicacao publica;
 - dashboard financeiro;
 - conciliacao fiscal/NFS-e;
 - notificacoes;
@@ -71,9 +77,13 @@ Nao executar roteiro completo em producao. Usar apenas smoke tests controlados, 
 | Publisher | Criar produtos, concursos e boloes |
 | Approver | Aprovar/publicar produtos e boloes |
 | Support | Consultar pedidos, clientes e status operacionais no backoffice |
-| Administrator | Acessar financeiro, conciliacao, relatorios e rotinas administrativas |
+| Administrator | Acessar financeiro, conciliacao, relatorios, geracao em lote e rotinas administrativas |
 
 ## Dados de Teste
+
+Para a massa controlada de publicacao de `BolaoProduct`, `LotteryContest` e `Pool`, limitada a Mega-Sena, Lotofacil e Quina, use:
+
+- [backoffice-publication-test-data.md](backoffice-publication-test-data.html)
 
 Registrar antes da rodada:
 
@@ -93,6 +103,8 @@ Registrar durante a rodada:
 - Product ID:
 - Contest ID:
 - Pool ID:
+- LotteryResult ID:
+- PoolResult ID:
 - Customer ID:
 - CustomerSubscription ID:
 - Order ID:
@@ -118,8 +130,11 @@ Obrigatoria antes de cada release candidata.
 10. Validar ledger financeiro.
 11. Validar NFS-e ou fila fiscal pendente.
 12. Rodar pacote mensal.
-13. Validar notificacoes criticas.
-14. Validar relatorios do backoffice.
+13. Gerar lote do proximo mes e validar idempotencia.
+14. Registrar resultado, conferir bolao, registrar premiacao e publicar resultado.
+15. Validar pagina publica de resultados.
+16. Validar notificacoes criticas.
+17. Validar relatorios do backoffice.
 
 ### Camada 2 - Testes Automatizados Criticos
 
@@ -134,6 +149,10 @@ Minimo para gate de CI/CD:
 - processamento de assinatura mensal;
 - criacao e emissao de `ServiceInvoice`;
 - relatorio fiscal cruzando nota, pedido pago e ledger.
+- publicacao/ocultacao de `LotteryResult`;
+- consulta publica bloqueando resultado oculto;
+- consulta publica exibindo bolao aguardando conferencia;
+- filtro publico por status de resultado.
 
 ### Camada 3 - Integracao
 
@@ -144,6 +163,7 @@ Cenarios prioritarios:
 3. Assinatura mensal + processamento + pagamento.
 4. Pagamento confirmado + ledger + NFS-e.
 5. Relatorio fiscal e financeiro no backoffice.
+6. Resultado cadastrado + conferencia + premiacao + publicacao publica.
 
 ## Cenarios Ponta a Ponta
 
@@ -330,6 +350,61 @@ Resultado esperado:
 - a aprovacao muda o estado da oferta;
 - a loja passa a refletir a publicacao sem inconsistencias visiveis.
 
+### Cenario 6C - Geracao em Lote de Boloes
+
+Passos:
+
+1. Entrar no backoffice como `Administrator`.
+2. Abrir a area de geracao de boloes.
+3. Revisar modelos ativos de Mega-Sena, Lotofacil, Quina e bolao mensal Mega-Sena.
+4. Confirmar cotas, valor de cota, taxa administrativa, dias da semana e proximo concurso.
+5. Executar "Gerar Boloes do Proximo Mes".
+6. Conferir concursos criados para o periodo.
+7. Conferir boloes avulsos criados por concurso.
+8. Conferir bolao mensal da Mega-Sena com os concursos do periodo.
+9. Reexecutar a geracao.
+10. Validar que nao houve duplicidade.
+11. Editar um bolao futuro e ajustar valor, cotas, data, status ou observacao.
+
+Resultado esperado:
+
+- modelos ativos geram concursos e boloes futuros;
+- modelos inativos nao geram registros;
+- concursos e boloes existentes nao sao duplicados;
+- bolao mensal fica vinculado aos concursos da competencia;
+- os registros gerados podem ser revisados antes da publicacao.
+
+### Cenario 6D - Resultado, Conferencia e Publicacao Publica
+
+Passos:
+
+1. Criar ou localizar concurso com bolao publicado.
+2. Cadastrar jogos do bolao, quando a massa exigir conferencia.
+3. Abrir area de resultados no backoffice.
+4. Cadastrar resultado oficial do concurso.
+5. Executar conferencia dos jogos.
+6. Validar status do bolao:
+   - aguardando conferencia;
+   - nao premiado;
+   - premiado.
+7. Registrar faixas e valores de premiacao, quando houver premio.
+8. Validar calculo de premio por cota.
+9. Publicar resultado publicamente.
+10. Abrir `/Resultados` na loja.
+11. Filtrar por modalidade, concurso, periodo e status.
+12. Validar que a home mostra resumo e ultimos resultados.
+13. Ocultar o resultado no backoffice.
+14. Validar que o resultado oculto nao aparece mais publicamente.
+
+Resultado esperado:
+
+- resultado oficial fica registrado sem duplicidade para o mesmo concurso;
+- conferencia gera status coerente para cada bolao;
+- premiacao calcula total e valor por cota;
+- resultado so aparece publicamente quando marcado como publico;
+- resultado oculto nao e exposto pela API publica;
+- nenhum dado de cliente, pedido, CPF, e-mail ou pagamento aparece na pagina publica.
+
 ### Cenario 7 - Dashboard Financeiro
 
 Passos:
@@ -393,7 +468,7 @@ Passos:
    - boas-vindas ao concluir cadastro;
    - compra confirmada;
    - nota fiscal emitida;
-   - resultado, se implementado.
+   - resultado e premiacao, quando aplicavel.
 
 Resultado esperado:
 
@@ -461,6 +536,9 @@ Antes de convidar outra pessoa para testar:
 10. Confirmar fila fiscal ou NFS-e.
 11. Abrir dashboard financeiro.
 12. Abrir relatorio fiscal.
+13. Cadastrar resultado de concurso.
+14. Publicar resultado na loja.
+15. Conferir `/Resultados`.
 
 ## Severidade de Defeitos
 
@@ -471,6 +549,8 @@ Antes de convidar outra pessoa para testar:
 - Pagamento nao confirma pedido.
 - Webhook duplica cota/participacao/ledger.
 - Backoffice nao publica oferta.
+- Geracao em lote duplica concursos ou boloes.
+- Resultado publico expoe dados de cliente, pedido ou pagamento.
 - Falha fiscal bloqueia pedido pago.
 
 ### S2 - Alto
@@ -480,6 +560,8 @@ Antes de convidar outra pessoa para testar:
 - NFS-e com base fiscal incorreta.
 - Relatorio fiscal divergente do ledger.
 - Usuario sem permissao acessa area restrita.
+- Premiacao por cota calculada incorretamente.
+- Resultado oculto aparece publicamente.
 
 ### S3 - Medio
 
@@ -522,6 +604,9 @@ Observacoes:
 - Login por codigo funciona para cliente existente.
 - Produto mensal gera cobranca unica do pacote.
 - Backoffice cria, aprova e publica produto/pool.
+- Geracao em lote cria concursos e boloes futuros sem duplicidade.
+- Resultado pode ser cadastrado, conferido, premiado e publicado.
+- Pagina publica de resultados lista apenas resultados marcados como publicos.
 - Dashboard financeiro reconcilia valores do ledger.
 - NFS-e fica emitida ou pendente com rastreabilidade.
 - Relatorio fiscal cruza nota, pedido pago e ledger.
