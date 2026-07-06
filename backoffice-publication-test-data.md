@@ -175,79 +175,15 @@ O ciclo minimo de publicacao de resultado e:
 
 ## Fluxograma da Publicacao
 
-```text
-flowchart TD
-    A["Inicio"] --> B["Publisher cria produto"]
-    B --> C{"Tipo de oferta"}
-    C -->|Single| D["Configura produto avulso"]
-    C -->|RecurringMonthly| E["Configura produto mensal"]
-    D --> F["Salvar produto em Draft"]
-    E --> F
-    F --> G["Publisher cria concurso"]
-    G --> H["Salvar concurso em Draft"]
-    H --> I["Approver abre concurso para vendas"]
-    I --> J["Publisher cria bolao"]
-    J --> K["Vincular produto e concurso"]
-    K --> L["Preencher preco, cotas e janela de vendas"]
-    L --> M["Salvar bolao em Draft"]
-    M --> N{"Produto mensal?"}
-    N -->|Sim| O["Selecionar pools incluidos no produto"]
-    N -->|Nao| P["Seguir fluxo"]
-    O --> P
-    P --> Q["Publisher envia produto para aprovacao"]
-    Q --> R["Publisher envia bolao para aprovacao"]
-    R --> S["Approver revisa produto"]
-    S --> T{"Produto aprovado?"}
-    T -->|Nao| U["Rejeitar produto com motivo"]
-    T -->|Sim| V["Aprovar produto"]
-    V --> W["Publicar produto"]
-    W --> X["Approver revisa bolao"]
-    X --> Y{"Bolao aprovado?"}
-    Y -->|Nao| Z["Rejeitar bolao com motivo"]
-    Y -->|Sim| AA["Aprovar bolao"]
-    AA --> AB["Publicar bolao"]
-    AB --> AC{"Checklist final OK?"}
-    AC -->|Nao| AD["Corrigir cadastro ou status"]
-    AC -->|Sim| AE["Oferta exibida na loja"]
-    AD --> X
-```
+![Fluxograma da publicacao de boloes](assets/diagrams/publicacao-fluxo.svg)
 
 ## Fluxograma da Geracao em Lote
 
-```text
-flowchart TD
-    A["Administrator abre Geracao de Boloes"] --> B["Revisa modelos ativos"]
-    B --> C["Executa Gerar Boloes do Proximo Mes"]
-    C --> D["Sistema calcula datas por loteria"]
-    D --> E["Cria concursos ausentes"]
-    E --> F["Cria boloes avulsos ausentes"]
-    F --> G{"Modelo mensal ativo?"}
-    G -->|Sim| H["Cria bolao mensal Mega-Sena da competencia"]
-    G -->|Nao| I["Finaliza geracao"]
-    H --> I
-    I --> J["Operador revisa registros gerados"]
-    J --> K["Ajusta premio, acumulado, cotas, valores e status"]
-    K --> L["Segue fluxo de aprovacao/publicacao"]
-```
+![Fluxograma da geracao em lote de boloes](assets/diagrams/geracao-lote-fluxo.svg)
 
 ## Fluxograma da Publicacao de Resultados
 
-```text
-flowchart TD
-    A["Concurso realizado"] --> B["Operador cadastra resultado oficial"]
-    B --> C["Executa conferencia dos jogos"]
-    C --> D{"Bolao premiado?"}
-    D -->|Nao| E["Status: Nao premiado"]
-    D -->|Sim| F["Registra faixas e valores"]
-    F --> G["Calcula premio por cota"]
-    E --> H["Revisao operacional"]
-    G --> H
-    H --> I{"Publicar resultado?"}
-    I -->|Nao| J["Resultado fica interno"]
-    I -->|Sim| K["Resultado fica publico"]
-    K --> L["Loja exibe em /Resultados"]
-    K --> M["Home atualiza resumo e ultimos resultados"]
-```
+![Fluxograma da publicacao de resultados](assets/diagrams/resultados-fluxo.svg)
 
 ## Regras de Negocio da Publicacao
 

@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 760" role="img" aria-labelledby="title desc">
+  <title id="title">Fluxograma da geracao em lote de boloes</title>
+  <desc id="desc">Fluxo de geracao mensal de concursos e boloes a partir de modelos ativos.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#2563eb"/></marker>
+    <style>.bg{fill:#f8fafc}.box{fill:#fff;stroke:#2563eb;stroke-width:2;rx:10}.decision{fill:#fff7ed;stroke:#f97316;stroke-width:2;rx:10}.ok{fill:#ecfdf5;stroke:#047857;stroke-width:2;rx:10}.label{fill:#111827;font-family:Arial,sans-serif;font-size:18px;font-weight:700;text-anchor:middle}.small{fill:#4b5563;font-family:Arial,sans-serif;font-size:14px;text-anchor:middle}.line{fill:none;stroke:#2563eb;stroke-width:2.5;marker-end:url(#arrow)}.note{fill:#1d4ed8;font-family:Arial,sans-serif;font-size:13px;font-weight:700;text-anchor:middle}</style>
+  </defs>
+  <rect class="bg" width="1000" height="760"/><text x="500" y="44" class="label" style="font-size:27px">Geracao em lote de boloes</text>
+  <rect class="box" x="80" y="100" width="230" height="72"/><text x="195" y="130" class="label">Abre geracao</text><text x="195" y="152" class="small">Administrator</text>
+  <rect class="box" x="385" y="100" width="230" height="72"/><text x="500" y="130" class="label">Revisa modelos</text><text x="500" y="152" class="small">ativos e parametros</text>
+  <rect class="box" x="690" y="100" width="230" height="72"/><text x="805" y="130" class="label">Executa rotina</text><text x="805" y="152" class="small">proximo mes</text>
+  <rect class="box" x="690" y="245" width="230" height="72"/><text x="805" y="275" class="label">Calcula datas</text><text x="805" y="297" class="small">por loteria</text>
+  <rect class="box" x="385" y="245" width="230" height="72"/><text x="500" y="275" class="label">Cria concursos</text><text x="500" y="297" class="small">somente ausentes</text>
+  <rect class="box" x="80" y="245" width="230" height="72"/><text x="195" y="275" class="label">Cria boloes</text><text x="195" y="297" class="small">sem duplicidade</text>
+  <rect class="decision" x="80" y="400" width="230" height="72"/><text x="195" y="430" class="label">Modelo mensal?</text><text x="195" y="452" class="small">Mega-Sena ativo</text>
+  <rect class="box" x="385" y="400" width="230" height="72"/><text x="500" y="430" class="label">Cria mensal</text><text x="500" y="452" class="small">competencia</text>
+  <rect class="box" x="690" y="400" width="230" height="72"/><text x="805" y="430" class="label">Finaliza</text><text x="805" y="452" class="small">geracao</text>
+  <rect class="box" x="385" y="555" width="230" height="72"/><text x="500" y="585" class="label">Revisao</text><text x="500" y="607" class="small">operador ajusta dados</text>
+  <rect class="ok" x="385" y="665" width="230" height="58"/><text x="500" y="700" class="label">Segue aprovacao</text>
+  <path class="line" d="M310 136 H385"/><path class="line" d="M615 136 H690"/><path class="line" d="M805 172 V245"/><path class="line" d="M690 281 H615"/><path class="line" d="M385 281 H310"/><path class="line" d="M195 317 V400"/><path class="line" d="M310 436 H385"/><text x="348" y="421" class="note">Sim</text><path class="line" d="M615 436 H690"/><path class="line" d="M195 472 C195 525 440 520 500 555"/><text x="275" y="515" class="note">Nao</text><path class="line" d="M805 472 C805 545 615 520 540 555"/><path class="line" d="M500 627 V665"/>
+</svg>

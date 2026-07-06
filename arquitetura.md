@@ -104,32 +104,7 @@ No MVP, a emissao fiscal esta focada na taxa de administracao.
 
 Sorterama usa uma arquitetura modular, com separacao entre interface, regras de negocio, integracoes e persistencia.
 
-```text
-flowchart LR
-    Cliente["Cliente"]
-    Loja["Loja Web"]
-    Backoffice["Backoffice"]
-    Plataforma["API e Regras de Negocio"]
-    Dados["Banco de Dados"]
-    Fila["Fila Assincrona"]
-    Pagamento["Pagamento Pix"]
-    Fiscal["Emissao Fiscal"]
-    Comunicacao["E-mail e Notificacoes"]
-    Relatorios["Relatorios e Conciliacao"]
-    Resultados["Resultados Publicos"]
-
-    Cliente --> Loja
-    Loja --> Plataforma
-    Backoffice --> Plataforma
-    Plataforma --> Dados
-    Plataforma --> Fila
-    Plataforma --> Pagamento
-    Fila --> Fiscal
-    Plataforma --> Comunicacao
-    Plataforma --> Relatorios
-    Plataforma --> Resultados
-    Resultados --> Loja
-```
+![Arquitetura em alto nivel do Sorterama](assets/diagrams/arquitetura-fluxo.svg)
 
 ## Integracoes Externas
 

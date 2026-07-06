@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 820" role="img" aria-labelledby="title desc">
+  <title id="title">Fluxograma de publicacao de resultados</title>
+  <desc id="desc">Fluxo para cadastro de resultado, conferencia de jogos, premiacao e publicacao publica.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#2563eb"/></marker>
+    <style>.bg{fill:#f8fafc}.box{fill:#fff;stroke:#2563eb;stroke-width:2;rx:10}.decision{fill:#fff7ed;stroke:#f97316;stroke-width:2;rx:10}.ok{fill:#ecfdf5;stroke:#047857;stroke-width:2;rx:10}.hold{fill:#fefce8;stroke:#ca8a04;stroke-width:2;rx:10}.label{fill:#111827;font-family:Arial,sans-serif;font-size:18px;font-weight:700;text-anchor:middle}.small{fill:#4b5563;font-family:Arial,sans-serif;font-size:14px;text-anchor:middle}.line{fill:none;stroke:#2563eb;stroke-width:2.5;marker-end:url(#arrow)}.note{fill:#1d4ed8;font-family:Arial,sans-serif;font-size:13px;font-weight:700;text-anchor:middle}</style>
+  </defs>
+  <rect class="bg" width="1000" height="820"/><text x="500" y="44" class="label" style="font-size:27px">Publicacao de resultados</text>
+  <rect class="box" x="95" y="100" width="230" height="72"/><text x="210" y="130" class="label">Concurso realizado</text><text x="210" y="152" class="small">sorteio oficial</text>
+  <rect class="box" x="385" y="100" width="230" height="72"/><text x="500" y="130" class="label">Cadastra resultado</text><text x="500" y="152" class="small">numeros oficiais</text>
+  <rect class="box" x="675" y="100" width="230" height="72"/><text x="790" y="130" class="label">Confere jogos</text><text x="790" y="152" class="small">por bolao</text>
+  <rect class="decision" x="675" y="245" width="230" height="72"/><text x="790" y="275" class="label">Bolao premiado?</text><text x="790" y="297" class="small">validar acertos</text>
+  <rect class="hold" x="385" y="245" width="230" height="72"/><text x="500" y="275" class="label">Nao premiado</text><text x="500" y="297" class="small">ou aguardando ajuste</text>
+  <rect class="box" x="675" y="390" width="230" height="72"/><text x="790" y="420" class="label">Registra premio</text><text x="790" y="442" class="small">faixas e valores</text>
+  <rect class="box" x="385" y="390" width="230" height="72"/><text x="500" y="420" class="label">Calcula por cota</text><text x="500" y="442" class="small">rateio operacional</text>
+  <rect class="box" x="95" y="390" width="230" height="72"/><text x="210" y="420" class="label">Revisao</text><text x="210" y="442" class="small">dados internos</text>
+  <rect class="decision" x="95" y="545" width="230" height="72"/><text x="210" y="575" class="label">Publicar?</text><text x="210" y="597" class="small">flag explicita</text>
+  <rect class="hold" x="385" y="545" width="230" height="72"/><text x="500" y="575" class="label">Fica interno</text><text x="500" y="597" class="small">nao aparece na loja</text>
+  <rect class="ok" x="95" y="690" width="230" height="72"/><text x="210" y="720" class="label">Resultado publico</text><text x="210" y="742" class="small">visivel em /Resultados</text>
+  <rect class="ok" x="385" y="690" width="230" height="72"/><text x="500" y="720" class="label">Home atualiza</text><text x="500" y="742" class="small">resumo e ultimos</text>
+  <path class="line" d="M325 136 H385"/><path class="line" d="M615 136 H675"/><path class="line" d="M790 172 V245"/><path class="line" d="M675 281 H615"/><text x="644" y="266" class="note">Nao</text><path class="line" d="M790 317 V390"/><text x="825" y="355" class="note">Sim</text><path class="line" d="M675 426 H615"/><path class="line" d="M385 281 C315 300 245 355 220 390"/><path class="line" d="M385 426 H325"/><path class="line" d="M210 462 V545"/><path class="line" d="M325 581 H385"/><text x="356" y="566" class="note">Nao</text><path class="line" d="M210 617 V690"/><text x="247" y="656" class="note">Sim</text><path class="line" d="M325 726 H385"/>
+</svg>

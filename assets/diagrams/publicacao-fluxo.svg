@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 1500" role="img" aria-labelledby="title desc">
+  <title id="title">Fluxograma da publicacao de boloes</title>
+  <desc id="desc">Fluxo operacional do cadastro, aprovacao e publicacao de ofertas de bolao.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#2563eb"/></marker>
+    <style>.bg{fill:#f8fafc}.lane{fill:#eff6ff;stroke:#bfdbfe;stroke-width:1}.box{fill:#fff;stroke:#2563eb;stroke-width:2;rx:10}.decision{fill:#fff7ed;stroke:#f97316;stroke-width:2;rx:10}.ok{fill:#ecfdf5;stroke:#047857;stroke-width:2;rx:10}.bad{fill:#fef2f2;stroke:#dc2626;stroke-width:2;rx:10}.label{fill:#111827;font-family:Arial,sans-serif;font-size:17px;font-weight:700;text-anchor:middle}.small{fill:#4b5563;font-family:Arial,sans-serif;font-size:13px;text-anchor:middle}.line{fill:none;stroke:#2563eb;stroke-width:2.3;marker-end:url(#arrow)}.note{fill:#1d4ed8;font-family:Arial,sans-serif;font-size:13px;font-weight:700;text-anchor:middle}</style>
+  </defs>
+  <rect class="bg" width="1100" height="1500"/><text x="550" y="44" class="label" style="font-size:28px">Fluxograma da publicacao</text>
+  <rect class="lane" x="70" y="80" width="300" height="1360"/><rect class="lane" x="400" y="80" width="300" height="1360"/><rect class="lane" x="730" y="80" width="300" height="1360"/>
+  <text x="220" y="115" class="label">Publisher</text><text x="550" y="115" class="label">Approver</text><text x="880" y="115" class="label">Loja publica</text>
+  <rect class="box" x="110" y="150" width="220" height="62"/><text x="220" y="176" class="label">Inicio</text><text x="220" y="197" class="small">criar oferta</text>
+  <rect class="box" x="110" y="260" width="220" height="70"/><text x="220" y="290" class="label">Cria produto</text><text x="220" y="312" class="small">avulso ou mensal</text>
+  <rect class="decision" x="110" y="380" width="220" height="70"/><text x="220" y="410" class="label">Tipo de oferta?</text><text x="220" y="432" class="small">Single / Recurring</text>
+  <rect class="box" x="110" y="505" width="220" height="70"/><text x="220" y="535" class="label">Salva produto</text><text x="220" y="557" class="small">status Draft</text>
+  <rect class="box" x="110" y="625" width="220" height="70"/><text x="220" y="655" class="label">Cria concurso</text><text x="220" y="677" class="small">dados do sorteio</text>
+  <rect class="box" x="440" y="625" width="220" height="70"/><text x="550" y="655" class="label">Abre concurso</text><text x="550" y="677" class="small">OpenForSales</text>
+  <rect class="box" x="110" y="755" width="220" height="70"/><text x="220" y="785" class="label">Cria bolao</text><text x="220" y="807" class="small">produto + concurso</text>
+  <rect class="decision" x="110" y="875" width="220" height="70"/><text x="220" y="905" class="label">Produto mensal?</text><text x="220" y="927" class="small">selecionar pools</text>
+  <rect class="box" x="110" y="995" width="220" height="70"/><text x="220" y="1025" class="label">Envia aprovacao</text><text x="220" y="1047" class="small">produto e bolao</text>
+  <rect class="decision" x="440" y="995" width="220" height="70"/><text x="550" y="1025" class="label">Produto OK?</text><text x="550" y="1047" class="small">revisao comercial</text>
+  <rect class="bad" x="440" y="1115" width="220" height="70"/><text x="550" y="1145" class="label">Rejeita</text><text x="550" y="1167" class="small">corrigir cadastro</text>
+  <rect class="decision" x="440" y="1235" width="220" height="70"/><text x="550" y="1265" class="label">Bolao OK?</text><text x="550" y="1287" class="small">cotas e janela</text>
+  <rect class="bad" x="440" y="1355" width="220" height="70"/><text x="550" y="1385" class="label">Rejeita</text><text x="550" y="1407" class="small">ajustar bolao</text>
+  <rect class="ok" x="770" y="1235" width="220" height="70"/><text x="880" y="1265" class="label">Publica oferta</text><text x="880" y="1287" class="small">produto + bolao</text>
+  <rect class="ok" x="770" y="1355" width="220" height="70"/><text x="880" y="1385" class="label">Oferta exibida</text><text x="880" y="1407" class="small">vendavel na loja</text>
+  <path class="line" d="M220 212 V260"/><path class="line" d="M220 330 V380"/><path class="line" d="M220 450 V505"/><text x="342" y="485" class="note">Single ou mensal</text><path class="line" d="M220 575 V625"/><path class="line" d="M330 660 H440"/><path class="line" d="M440 660 H330"/><path class="line" d="M220 695 V755"/><path class="line" d="M220 825 V875"/><path class="line" d="M220 945 V995"/><path class="line" d="M330 1030 H440"/><path class="line" d="M550 1065 V1115"/><text x="675" y="1094" class="note">Nao</text><path class="line" d="M660 1030 C720 1030 720 1270 770 1270"/><text x="705" y="1014" class="note">Sim</text><path class="line" d="M550 1185 V1235"/><path class="line" d="M660 1270 H770"/><text x="700" y="1255" class="note">Sim</text><path class="line" d="M550 1305 V1355"/><text x="675" y="1334" class="note">Nao</text><path class="line" d="M880 1305 V1355"/>
+</svg>
