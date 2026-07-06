@@ -1,7 +1,3 @@
----
-title: Massa de Testes - Publicacao de Boloes no Backoffice
----
-
 # Massa de Testes - Publicacao de Boloes no Backoffice
 
 Data: abril de 2026.
@@ -179,7 +175,7 @@ O ciclo minimo de publicacao de resultado e:
 
 ## Fluxograma da Publicacao
 
-```mermaid
+```text
 flowchart TD
     A["Inicio"] --> B["Publisher cria produto"]
     B --> C{"Tipo de oferta"}
@@ -218,7 +214,7 @@ flowchart TD
 
 ## Fluxograma da Geracao em Lote
 
-```mermaid
+```text
 flowchart TD
     A["Administrator abre Geracao de Boloes"] --> B["Revisa modelos ativos"]
     B --> C["Executa Gerar Boloes do Proximo Mes"]
@@ -236,7 +232,7 @@ flowchart TD
 
 ## Fluxograma da Publicacao de Resultados
 
-```mermaid
+```text
 flowchart TD
     A["Concurso realizado"] --> B["Operador cadastra resultado oficial"]
     B --> C["Executa conferencia dos jogos"]

@@ -1,7 +1,3 @@
----
-title: Sorterama - Plano de Testes do Software
----
-
 # Sorterama - Plano de Testes do Software
 
 Data: abril de 2026.

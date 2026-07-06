@@ -1,7 +1,3 @@
----
-title: Sorterama - Produto e Arquitetura
----
-
 # Sorterama - Produto e Arquitetura
 
 Documento publico para investidores, parceiros e stakeholders.
@@ -108,7 +104,7 @@ No MVP, a emissao fiscal esta focada na taxa de administracao.
 
 Sorterama usa uma arquitetura modular, com separacao entre interface, regras de negocio, integracoes e persistencia.
 
-```mermaid
+```text
 flowchart LR
     Cliente["Cliente"]
     Loja["Loja Web"]
