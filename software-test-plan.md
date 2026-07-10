@@ -1,610 +1,212 @@
-# Sorterama - Plano de Testes do Software
+# Sorterama - Plano de Testes do MVP
 
-Data: abril de 2026.
-Ultima revisao: 05/07/2026.
+Ultima revisao: 09/07/2026.
 
-Este documento unifica a estrategia de testes, o runbook manual e o roteiro ponta a ponta do MVP.
+Este documento define o roteiro minimo de testes manuais e automatizados para homologacao do MVP.
 
 ## Objetivo
 
-Validar o Sorterama antes da homologacao ampliada e criar uma base minima de seguranca para evolucao continua.
+Validar os fluxos criticos da plataforma:
 
-O plano cobre:
-
-- onboarding e login;
-- login por codigo;
-- loja publica;
+- onboarding e autenticacao;
 - carrinho e checkout Pix;
-- confirmacao de pagamento;
-- idempotencia;
-- assinatura/pacote mensal;
-- backoffice operacional;
-- geracao em lote de concursos e boloes;
-- resultado, conferencia, premiacao e publicacao publica;
-- dashboard financeiro;
-- conciliacao fiscal/NFS-e;
-- notificacoes;
-- permissao e regressao visual basica.
-
-## Regras de Execucao
-
-- Executar em homologacao isolada sempre que houver validacao por terceiro.
-- Nao reutilizar o mesmo e-mail em rodadas completas.
-- Registrar ambiente, data/hora, usuario, passo, resultado esperado, resultado obtido e evidencia.
-- Registrar IDs gerados durante o teste.
-- Reprocessar webhooks somente nos cenarios de idempotencia.
-- Parar a rodada se login, checkout, pagamento ou publicacao de oferta ficarem bloqueados.
-
-## Ambientes
-
-### Local
-
-Usado por desenvolvimento para validacao rapida.
-
-- API local
-- Web publica local
-- Backoffice local
-- Banco local ou Docker
-- OpenPix sandbox ou simulacao local
-- Provider fiscal mock ou Focus NFe homologacao
-
-### Homologacao
-
-Usado para validacao por operador, QA ou stakeholder.
-
-- URL da loja:
-- URL do backoffice:
-- URL da API:
-- Banco separado de producao:
-- OpenPix sandbox configurado:
-- Focus NFe homologacao configurado:
-- Logs acessiveis para suporte:
-
-### Producao
-
-Nao executar roteiro completo em producao. Usar apenas smoke tests controlados, com dados e usuarios previamente autorizados.
-
-## Perfis Necessarios
-
-| Perfil | Uso no teste |
-| --- | --- |
-| Cliente novo | Criar conta, validar codigo, concluir cadastro, comprar e acompanhar pedido |
-| Cliente existente | Validar login com senha, login por codigo e nova compra |
-| Publisher | Criar produtos, concursos e boloes |
-| Approver | Aprovar/publicar produtos e boloes |
-| Support | Consultar pedidos, clientes e status operacionais no backoffice |
-| Administrator | Acessar financeiro, conciliacao, relatorios, geracao em lote e rotinas administrativas |
-
-## Dados de Teste
-
-Para a massa controlada de publicacao de `BolaoProduct`, `LotteryContest` e `Pool`, limitada a Mega-Sena, Lotofacil e Quina, use:
-
-- [backoffice-publication-test-data.md](backoffice-publication-test-data.html)
-
-Registrar antes da rodada:
-
-- Produto avulso:
-- Produto mensal:
-- Concurso avulso:
-- Concursos do pacote mensal:
-- Pool avulso:
-- Pools do pacote mensal:
-- Cliente de teste:
-- CPF de teste:
-- E-mail de teste:
-- Periodo do relatorio financeiro/fiscal:
-
-Registrar durante a rodada:
-
-- Product ID:
-- Contest ID:
-- Pool ID:
-- LotteryResult ID:
-- PoolResult ID:
-- Customer ID:
-- CustomerSubscription ID:
-- Order ID:
-- Payment ID:
-- ServiceInvoice ID:
-- Numero da NFS-e:
-
-## Camadas de Teste
-
-### Camada 1 - Checklist Manual de Release
-
-Obrigatoria antes de cada release candidata.
-
-1. Aplicar migrations em banco limpo.
-2. Criar usuario backoffice.
-3. Criar produto avulso.
-4. Criar concurso.
-5. Criar pool.
-6. Publicar oferta.
-7. Comprar pela loja publica.
-8. Confirmar pagamento.
-9. Validar pedido e participacao.
-10. Validar ledger financeiro.
-11. Validar NFS-e ou fila fiscal pendente.
-12. Rodar pacote mensal.
-13. Gerar lote do proximo mes e validar idempotencia.
-14. Registrar resultado, conferir bolao, registrar premiacao e publicar resultado.
-15. Validar pagina publica de resultados.
-16. Validar notificacoes criticas.
-17. Validar relatorios do backoffice.
-
-### Camada 2 - Testes Automatizados Criticos
-
-Minimo para gate de CI/CD:
-
-- regras de publicacao de `BolaoProduct`;
-- status de `LotteryContest`;
-- publicacao, cota e snapshot de `Pool`;
-- criacao de checkout a partir do carrinho;
-- processamento de webhook OpenPix;
-- idempotencia de pagamento;
-- processamento de assinatura mensal;
-- criacao e emissao de `ServiceInvoice`;
-- relatorio fiscal cruzando nota, pedido pago e ledger.
-- publicacao/ocultacao de `LotteryResult`;
-- consulta publica bloqueando resultado oculto;
-- consulta publica exibindo bolao aguardando conferencia;
-- filtro publico por status de resultado.
-
-### Camada 3 - Integracao
-
-Cenarios prioritarios:
-
-1. Produto + concurso + pool publicado.
-2. Carrinho + checkout + pagamento confirmado.
-3. Assinatura mensal + processamento + pagamento.
-4. Pagamento confirmado + ledger + NFS-e.
-5. Relatorio fiscal e financeiro no backoffice.
-6. Resultado cadastrado + conferencia + premiacao + publicacao publica.
-
-## Cenarios Ponta a Ponta
-
-### Cenario 1 - Onboarding e Login
-
-Passos:
-
-1. Abrir loja publica.
-2. Iniciar cadastro.
-3. Preencher nome, CPF, data de nascimento, e-mail, confirmacao de e-mail, telefone e WhatsApp.
-4. Solicitar codigo principal via WhatsApp/SMS.
-5. Validar se a expiracao do codigo aparece em horario do Brasil.
-6. Se necessario, solicitar codigo por e-mail como fallback.
-7. Informar o codigo recebido e confirmar a validacao.
-8. Preencher endereco.
-9. Definir senha e confirmar senha.
-10. Aceitar termos obrigatorios.
-11. Submeter cadastro.
-12. Validar tela de sucesso.
-13. Confirmar recebimento do e-mail de boas-vindas sem link de confirmacao e com mensagem "Bem-vindo(a) a Sorterama!".
-14. Fazer login com senha.
-15. Sair da conta.
-16. Fazer login por codigo.
-17. Validar preservacao de carrinho, se existir carrinho anonimo aberto.
-
-Resultado esperado:
-
-- cadastro conclui sem erro;
-- campos obrigatorios sao validados por etapa;
-- fallback por e-mail funciona quando habilitado;
-- horario exibido para o codigo reflete o horario local do Brasil;
-- e-mail de boas-vindas nao traz link de confirmacao;
-- login e logout funcionam;
-- login por codigo funciona com CPF ou e-mail, conforme cadastro do cliente.
-
-### Cenario 1B - Falhas de Onboarding e Recuperacao
-
-Passos:
-
-1. Solicitar codigo e informar codigo invalido.
-2. Solicitar novo codigo e informar codigo expirado.
-3. Tentar concluir cadastro sem validar codigo.
-4. Tentar concluir cadastro sem aceitar um dos termos.
-5. Corrigir os erros e reenviar.
-
-Resultado esperado:
-
-- mensagens de erro sao claras;
-- o usuario permanece na etapa correta;
-- a validacao do codigo bloqueia a conclusao do cadastro;
-- a recuperacao do fluxo nao exige recomecar o onboarding do zero.
-
-### Cenario 2 - Publicacao de Oferta Avulsa
-
-Passos:
-
-1. Entrar no backoffice como `Publisher`.
-2. Criar produto avulso.
-3. Informar valor da cota e taxa administrativa.
-4. Criar concurso aberto para vendas.
-5. Criar pool vinculado ao produto e concurso.
-6. Submeter produto/pool para aprovacao.
-7. Entrar como `Approver`.
-8. Aprovar/publicar produto e pool.
-
-Resultado esperado:
-
-- produto, concurso e pool sao salvos;
-- componentes financeiros ficam separados;
-- snapshot de publicacao fica coerente;
-- oferta aparece na loja dentro da janela de venda.
-
-### Cenario 3 - Catalogo, Carrinho e Checkout
-
-Passos:
-
-1. Abrir catalogo publico.
-2. Localizar produto publicado.
-3. Abrir detalhe.
-4. Adicionar ao carrinho.
-5. Conferir item, quantidade e total.
-6. Prosseguir para checkout.
-7. Gerar Pix.
-
-Resultado esperado:
-
-- produto aparece no catalogo;
-- detalhe mostra preco, premio, concurso e disponibilidade;
-- carrinho preserva pool correto;
-- pedido fica pendente;
-- pagamento Pix e criado com valor correto.
-
-### Cenario 4 - Pagamento, Participacao e Idempotencia
-
-Passos:
-
-1. Confirmar pagamento via sandbox/simulador OpenPix.
-2. Aguardar webhook.
-3. Abrir area do cliente.
-4. Validar pedido pago.
-5. Validar participacao criada.
-6. Validar reducao de cota.
-7. Reprocessar o mesmo webhook.
-8. Validar que nada duplicou.
-
-Resultado esperado:
-
-- pedido e pagamento ficam pagos;
-- ledger fica confirmado;
-- participacao e criada uma vez;
-- pool perde exatamente uma cota;
-- replay nao duplica ledger, participacao ou baixa de cota.
-
-### Cenario 5 - Pacote Mensal
-
-Regra de negocio:
-
-- cliente compra um pacote mensal uma vez;
-- preco cobrado e o preco do produto mensal;
-- pacote inclui pools explicitamente selecionados;
-- cliente nao paga a soma das cotas avulsas;
-- apos pagamento, recebe uma participacao em cada pool incluido;
-- cada pool incluido perde uma cota somente apos pagamento.
-
-Passos:
-
-1. Criar pelo menos dois pools publicados.
-2. Criar produto `RecurringMonthly`.
-3. Definir preco do pacote.
-4. Selecionar pools incluidos.
-5. Publicar produto.
-6. Cliente ativa assinatura.
-7. Backoffice executa processamento mensal.
-8. Confirmar pedido com um item por pool incluido.
-9. Confirmar Pix unico no valor do pacote.
-10. Confirmar pagamento.
-11. Validar participacoes.
-12. Reexecutar processamento e webhook para validar idempotencia.
-
-Resultado esperado:
-
-- cobranca unica no valor do pacote;
-- pedido contem os pools incluidos;
-- processamento nao duplica cobranca valida;
-- pagamento cria participacao em cada pool;
-- quotas caem uma vez por pool.
-
-### Cenario 6 - Backoffice de Suporte
-
-Passos:
-
-1. Entrar no backoffice como `Support`.
-2. Abrir lista de pedidos.
-3. Localizar pedido pendente.
-4. Abrir detalhe.
-5. Conferir cliente, itens, pagamento e valores.
-6. Consultar historico operacional disponivel.
-7. Atualizar a tela apos confirmacao do pagamento.
-8. Validar status pago e participacoes.
-
-Resultado esperado:
-
-- suporte localiza pedido;
-- detalhe mostra composicao financeira;
-- status acompanha webhook;
-- contexto permite auditar cliente, pedido, pagamento e participacao.
-
-### Cenario 6B - Rotina de Publisher e Approver
-
-Passos:
-
-1. Entrar como `Publisher`.
-2. Criar ou editar produto.
-3. Criar ou editar concurso.
-4. Criar ou editar pool.
-5. Submeter para aprovacao.
-6. Entrar como `Approver`.
-7. Aprovar o cadastro.
-8. Conferir reflexo na loja publica.
-
-Resultado esperado:
-
-- cada perfil enxerga apenas o que precisa para sua funcao;
-- a aprovacao muda o estado da oferta;
-- a loja passa a refletir a publicacao sem inconsistencias visiveis.
-
-### Cenario 6C - Geracao em Lote de Boloes
-
-Passos:
-
-1. Entrar no backoffice como `Administrator`.
-2. Abrir a area de geracao de boloes.
-3. Revisar modelos ativos de Mega-Sena, Lotofacil, Quina e bolao mensal Mega-Sena.
-4. Confirmar cotas, valor de cota, taxa administrativa, dias da semana e proximo concurso.
-5. Executar "Gerar Boloes do Proximo Mes".
-6. Conferir concursos criados para o periodo.
-7. Conferir boloes avulsos criados por concurso.
-8. Conferir bolao mensal da Mega-Sena com os concursos do periodo.
-9. Reexecutar a geracao.
-10. Validar que nao houve duplicidade.
-11. Editar um bolao futuro e ajustar valor, cotas, data, status ou observacao.
-
-Resultado esperado:
-
-- modelos ativos geram concursos e boloes futuros;
-- modelos inativos nao geram registros;
-- concursos e boloes existentes nao sao duplicados;
-- bolao mensal fica vinculado aos concursos da competencia;
-- os registros gerados podem ser revisados antes da publicacao.
-
-### Cenario 6D - Resultado, Conferencia e Publicacao Publica
-
-Passos:
-
-1. Criar ou localizar concurso com bolao publicado.
-2. Cadastrar jogos do bolao, quando a massa exigir conferencia.
-3. Abrir area de resultados no backoffice.
-4. Cadastrar resultado oficial do concurso.
-5. Executar conferencia dos jogos.
-6. Validar status do bolao:
-   - aguardando conferencia;
-   - nao premiado;
-   - premiado.
-7. Registrar faixas e valores de premiacao, quando houver premio.
-8. Validar calculo de premio por cota.
-9. Publicar resultado publicamente.
-10. Abrir `/Resultados` na loja.
-11. Filtrar por modalidade, concurso, periodo e status.
-12. Validar que a home mostra resumo e ultimos resultados.
-13. Ocultar o resultado no backoffice.
-14. Validar que o resultado oculto nao aparece mais publicamente.
-
-Resultado esperado:
-
-- resultado oficial fica registrado sem duplicidade para o mesmo concurso;
-- conferencia gera status coerente para cada bolao;
-- premiacao calcula total e valor por cota;
-- resultado so aparece publicamente quando marcado como publico;
-- resultado oculto nao e exposto pela API publica;
-- nenhum dado de cliente, pedido, CPF, e-mail ou pagamento aparece na pagina publica.
-
-### Cenario 7 - Dashboard Financeiro
-
-Passos:
-
-1. Acessar financeiro com usuario sem `Administrator`.
-2. Confirmar bloqueio.
-3. Acessar como `Administrator`.
-4. Filtrar periodo com pedidos testados.
-5. Validar total vendido.
-6. Validar valor de cotas.
-7. Validar taxa administrativa bruta.
-8. Validar descontos/isencoes.
-9. Validar taxa administrativa liquida.
-10. Validar agrupamento por pool e produto.
-11. Validar status de splits e divergencias.
-
-Resultado esperado:
-
-- apenas `Administrator` acessa;
-- totais batem com ledger;
-- pendentes nao inflam vendas confirmadas;
-- descontos reduzem apenas taxa administrativa liquida;
-- divergencias de split aparecem quando existirem.
-
-### Cenario 8 - NFS-e e Relatorio Fiscal
-
-Passos:
-
-1. Confirmar pagamento de pedido com taxa administrativa.
-2. Verificar criacao/garantia de `ServiceInvoice`.
-3. Confirmar publicacao de `service-invoice.requested`.
-4. Aguardar handler fiscal ou polling.
-5. Validar status da nota.
-6. Validar e-mail de nota emitida.
-7. Acessar area logada do cliente.
-8. Confirmar acesso ao numero/link da nota.
-9. Abrir relatorio fiscal no backoffice.
-10. Filtrar periodo.
-11. Exportar CSV.
-12. Comparar nota, pedido pago e ledger da taxa de administracao.
-
-Resultado esperado:
-
-- falha fiscal nao desfaz pagamento;
-- nota fica pendente ou emitida com rastreabilidade;
-- cliente recebe informacao suficiente por e-mail;
-- backoffice mostra emitido, registrado no ledger, diferenca e pendencias;
-- CSV contem dados para conferencia fiscal/contabil.
-
-### Cenario 9 - Notificacoes
-
-Passos:
-
-1. Concluir onboarding.
-2. Validar e-mail de boas-vindas.
-3. Gerar compra pendente.
-4. Confirmar pagamento.
-5. Emitir ou simular emissao de NFS-e.
-6. Validar notificacoes para:
-   - codigo de onboarding por e-mail, quando usado;
-   - boas-vindas ao concluir cadastro;
-   - compra confirmada;
-   - nota fiscal emitida;
-   - resultado e premiacao, quando aplicavel.
-
-Resultado esperado:
-
-- notificacoes sao criadas/enviadas no contexto correto;
-- nao ha duplicidade para o mesmo evento;
-- e-mail de boas-vindas reflete o layout vigente, sem link de confirmacao;
-- SMS nao e obrigatorio para NFS-e no MVP.
-
-## Roteiro Especifico por Tipo de Usuario
-
-### Roteiro do cliente
-
-1. iniciar onboarding
-2. validar codigo
-3. concluir cadastro
-4. receber boas-vindas
-5. fazer login com senha
-6. fazer login por codigo
-7. adicionar item ao carrinho
-8. gerar Pix
-9. confirmar pedido pago
-10. acessar historico do cliente
-
-### Roteiro do time de backoffice
-
-1. entrar com perfil correto
-2. validar menus permitidos para o perfil
-3. criar ou revisar produto, concurso e pool
-4. aprovar publicacao
-5. localizar pedido no suporte
-6. validar dashboards financeiro e fiscal
-7. exportar relatorios quando aplicavel
-
-### Cenario 10 - Permissoes e Regressao Visual
-
-Passos:
-
-1. Acessar backoffice sem login.
-2. Acessar backoffice com perfil cliente.
-3. Acessar financeiro sem `Administrator`.
-4. Abrir loja em desktop e mobile.
-5. Abrir detalhe, carrinho e checkout em desktop/mobile.
-6. Abrir backoffice em desktop.
-
-Resultado esperado:
-
-- areas restritas bloqueiam perfis indevidos;
-- textos nao quebram layout;
-- botoes principais ficam acessiveis;
-- fluxo de compra nao depende de tela grande.
-
-## Smoke Test de Homologacao
-
-Antes de convidar outra pessoa para testar:
-
-1. Abrir loja.
-2. Fazer login no backoffice.
-3. Criar produto/pool de teste.
-4. Confirmar produto na loja.
-5. Gerar checkout.
-6. Confirmar cobranca Pix.
-7. Simular webhook pago.
-8. Confirmar pedido pago.
-9. Confirmar ledger.
-10. Confirmar fila fiscal ou NFS-e.
-11. Abrir dashboard financeiro.
-12. Abrir relatorio fiscal.
-13. Cadastrar resultado de concurso.
-14. Publicar resultado na loja.
-15. Conferir `/Resultados`.
-
-## Severidade de Defeitos
-
-### S1 - Bloqueador
-
-- Login nao funciona.
-- Checkout nao gera pedido.
-- Pagamento nao confirma pedido.
-- Webhook duplica cota/participacao/ledger.
-- Backoffice nao publica oferta.
-- Geracao em lote duplica concursos ou boloes.
-- Resultado publico expoe dados de cliente, pedido ou pagamento.
-- Falha fiscal bloqueia pedido pago.
-
-### S2 - Alto
-
-- Valor financeiro incorreto.
-- Split incorreto.
-- NFS-e com base fiscal incorreta.
-- Relatorio fiscal divergente do ledger.
-- Usuario sem permissao acessa area restrita.
-- Premiacao por cota calculada incorretamente.
-- Resultado oculto aparece publicamente.
-
-### S3 - Medio
-
-- Texto confuso.
-- Layout quebrado sem impedir fluxo.
-- Mensagem de erro pouco clara.
-- Log insuficiente para diagnosticar uma falha nao critica.
-
-### S4 - Baixo
-
-- Ajuste visual pequeno.
-- Melhoria de usabilidade sem impacto no fluxo principal.
-
-## Template de Registro
-
-```text
-Ambiente:
-Data/hora:
-Testador:
-Modulo:
-Cenario:
-Passo:
-Resultado: Pass / Fail / Blocked
-Resultado esperado:
-Resultado obtido:
-IDs envolvidos:
-Evidencia:
-Severidade:
-Observacoes:
+- webhooks e idempotencia;
+- publicacao de concursos, produtos e boloes;
+- cadastro/importacao de jogos/participacoes em loterias oficiais;
+- resultado oficial, conferencia, premiacao e liberacao para resgate;
+- area logada do cliente;
+- backoffice financeiro/fiscal;
+- comunicacoes transacionais;
+- linguagem de compliance.
+
+## Testes Automatizados
+
+Comandos recomendados:
+
+```powershell
+dotnet build Sorterama.sln
+dotnet test Sorterama.sln --no-build
 ```
 
-## Criterios de Aceite do MVP
+Coberturas minimas atuais esperadas:
 
-- Onboarding de cliente novo passa.
-- Verificacao por codigo do onboarding passa em horario do Brasil.
-- Produto avulso aparece na loja.
-- Checkout gera pedido e Pix.
-- Pagamento confirma pedido e cria participacao.
-- Replay do webhook nao duplica efeitos.
-- Login por codigo funciona para cliente existente.
-- Produto mensal gera cobranca unica do pacote.
-- Backoffice cria, aprova e publica produto/pool.
-- Geracao em lote cria concursos e boloes futuros sem duplicidade.
-- Resultado pode ser cadastrado, conferido, premiado e publicado.
-- Pagina publica de resultados lista apenas resultados marcados como publicos.
-- Dashboard financeiro reconcilia valores do ledger.
-- NFS-e fica emitida ou pendente com rastreabilidade.
-- Relatorio fiscal cruza nota, pedido pago e ledger.
-- Notificacoes criticas chegam ou ficam registradas.
-- Nenhum defeito S1 aberto.
+- validacao de jogos por modalidade;
+- rejeicao de dezenas repetidas;
+- conferencia de jogos contra resultado oficial;
+- importacao atomica de jogos por arquivo;
+- registro financeiro de premiacao por resultado;
+- calculo por cotas pagas/elegiveis;
+- liberacao administrativa de premiacao para resgate;
+- bloqueio de liberacao sem cotas elegiveis.
+
+Novas funcionalidades devem ter pelo menos:
+
+- um teste positivo;
+- um teste negativo ou nulo;
+- validacao de idempotencia quando houver escrita sensivel.
+
+## Roteiro Manual - Publicacao de Boloes
+
+### Geracao em lote
+
+1. Acessar Backoffice > Produtos e boloes > Geracao.
+2. Revisar modelos ativos de Mega-Sena, Lotofacil e Quina.
+3. Executar "Gerar Boloes do Proximo Mes".
+4. Confirmar que concursos e boloes futuros foram criados.
+5. Reexecutar a acao e confirmar que nao houve duplicidade.
+6. Validar que os itens seguem em fluxo operacional interno ate cadastro/importacao dos jogos.
+
+Resultado esperado:
+
+- concursos futuros criados conforme calendario configurado;
+- bolao mensal da Mega-Sena criado quando modelo estiver ativo;
+- reexecucao idempotente;
+- valores, cotas e observacoes editaveis no backoffice.
+
+### Cadastro manual de jogos
+
+1. Abrir o bolao no backoffice.
+2. Cadastrar dezenas validas conforme modalidade.
+3. Salvar.
+4. Repetir com dezenas fora da faixa.
+5. Repetir com dezenas repetidas.
+
+Resultado esperado:
+
+- jogo valido salvo;
+- jogo invalido rejeitado com mensagem clara;
+- nenhuma conferencia deve depender de texto descritivo do bolao.
+
+### Importacao de jogos
+
+1. Baixar o modelo de importacao.
+2. Preencher arquivo com linhas validas.
+3. Importar.
+4. Confirmar total de linhas, validas e importadas.
+5. Importar arquivo com ao menos uma linha invalida.
+
+Resultado esperado:
+
+- arquivo valido importado;
+- arquivo invalido rejeitado integralmente;
+- erros exibidos por linha/campo;
+- nenhuma linha gravada quando houver erro.
+
+## Roteiro Manual - Resultado e Premiacao
+
+### Cadastro de resultado oficial
+
+1. Acessar Backoffice > Contabil/Fiscal ou Produtos e boloes > Resultados, conforme menu vigente.
+2. Registrar resultado oficial de concurso vencido.
+3. Confirmar que a lista de pendencias deixa de exibir o concurso quando resultado for registrado.
+4. Conferir que datas sao exibidas em `dd/MM/yyyy`, sem hora, nos filtros de periodo.
+
+Resultado esperado:
+
+- resultado oficial registrado;
+- numeros validados conforme modalidade;
+- concurso disponivel para conferencia dos boloes vinculados.
+
+### Conferencia de jogos
+
+1. Abrir detalhe do resultado.
+2. Executar "Conferir boloes vinculados".
+3. Confirmar status por bolao:
+   - sem jogos;
+   - nao premiado;
+   - premiado.
+4. Reexecutar a conferencia.
+
+Resultado esperado:
+
+- bolao sem jogos aparece como pendencia operacional;
+- conferencia por jogo atualiza sem duplicar registros;
+- melhor faixa, quantidade de jogos conferidos e dezenas acertadas aparecem no relatorio.
+
+### Registro de premiacao financeira
+
+1. Em bolao premiado, informar faixas oficiais e valores.
+2. Registrar premiacao.
+3. Confirmar valor total, valor por cota e cotas pagas/elegiveis.
+4. Reabrir a tela e confirmar persistencia.
+
+Resultado esperado:
+
+- `PoolResult` contem relatorio de conferencia;
+- `PoolPrize` contem valor financeiro;
+- `PoolPrizeShare` contem valor por cliente/cota;
+- premio fica identificado, mas ainda indisponivel para saque.
+
+### Liberacao para resgate
+
+1. Abrir bolao ou resultado com premiacao registrada.
+2. Confirmar status "Identificado, aguardando liberacao".
+3. Acionar "Liberar premiacao para resgate".
+4. Acessar area logada do cliente em `Account/Prizes`.
+
+Resultado esperado:
+
+- status muda para "Disponivel para resgate";
+- saldo entra em "Disponivel para saque";
+- texto informa prazo de 5 a 10 dias uteis apos liberacao;
+- reexecutar liberacao nao duplica saldo.
+
+## Roteiro Manual - Area Logada
+
+1. Criar usuario completo.
+2. Realizar compra Pix em ambiente mock ou homologacao.
+3. Confirmar pagamento por webhook.
+4. Validar dashboard, pedidos e detalhes.
+5. Validar `Account/Prizes` antes e depois da liberacao administrativa.
+6. Validar dados bancarios/Pix antes de solicitar resgate.
+
+Resultado esperado:
+
+- valores em `R$` e formato brasileiro;
+- horarios em BRT;
+- CPF, telefone e e-mail mascarados onde aplicavel;
+- saque bloqueado sem dados bancarios/Pix validos;
+- mensagem de prazo exibida antes da solicitacao.
+
+## Roteiro Manual - Compliance de Linguagem
+
+1. Buscar pelos termos sensiveis definidos pelo compliance.
+2. Validar paginas publicas, backoffice, area logada, e-mails, SMS/WhatsApp, seeds e documentos legais.
+3. Confirmar que textos exibidos usam "jogos/participacoes em loterias oficiais".
+
+Comando auxiliar:
+
+```powershell
+rg -n -i "<termos-sensiveis-definidos-pelo-compliance>" . -S -g "!**/bin/**" -g "!**/obj/**" -g "!**/wwwroot/lib/**" -g "!**/wwwroot/images/**"
+```
+
+Resultado esperado:
+
+- nenhuma ocorrencia em texto exibido ao usuario;
+- eventuais nomes tecnicos internos devem ser avaliados antes de renomear, para evitar quebra de contrato ou migracao desnecessaria.
+
+## Roteiro Manual - Pagamento Pix e Webhook
+
+1. Gerar pedido Pix.
+2. Confirmar QR Code e copia e cola.
+3. Confirmar pagamento via webhook OpenPix/Woovi.
+4. Reenviar o mesmo webhook.
+5. Validar status do pedido, ledger e comunicacao.
+
+Resultado esperado:
+
+- webhook validado por assinatura;
+- processamento idempotente;
+- pedido pago uma unica vez;
+- falha de e-mail nao impede confirmacao de pagamento.
+
+## Criterios de Saida da Homologacao
+
+- build verde;
+- testes automatizados verdes;
+- checkout Pix funcional;
+- geracao/importacao/publicacao de boloes validada;
+- resultado/conferencia/premiacao/liberacao validada;
+- resgate bloqueado antes da liberacao e liberado depois;
+- textos sensiveis revisados;
+- logs sem secrets e sem payloads sensiveis.

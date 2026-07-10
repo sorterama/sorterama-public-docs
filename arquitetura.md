@@ -2,7 +2,7 @@
 
 Documento publico para investidores, parceiros e stakeholders.
 
-Ultima revisao: 05/07/2026.
+Ultima revisao: 09/07/2026.
 
 ## Visao Geral
 
@@ -37,7 +37,8 @@ Sorterama centraliza o ciclo de vida da venda:
 8. emissao fiscal da taxa de administracao;
 9. notificacao ao cliente;
 10. publicacao de resultados e premiacoes;
-11. acompanhamento pelo backoffice.
+11. liberacao de saldo para resgate;
+12. acompanhamento pelo backoffice.
 
 O objetivo do MVP e validar o ciclo completo com seguranca operacional antes de ampliar volume, canais comerciais e automacoes.
 
@@ -53,6 +54,7 @@ Fluxos principais:
 - pacote mensal com mais de um bolao incluido;
 - acompanhamento do pedido;
 - consulta publica de resultados, boloes conferidos e premiacoes;
+- consulta de premiacoes e resgates na area logada;
 - acesso a informacoes fiscais quando aplicavel;
 - recebimento de comunicacoes transacionais.
 
@@ -65,8 +67,9 @@ Capacidades previstas no MVP:
 - cadastro e publicacao de produtos;
 - cadastro de concursos e boloes;
 - geracao em lote de concursos e boloes do proximo mes;
+- cadastro e importacao de jogos/participacoes em loterias oficiais;
 - aprovacao de ofertas;
-- cadastro de resultado, conferencia dos jogos, registro de premiacao e publicacao publica;
+- cadastro de resultado, conferencia dos jogos, registro de premiacao, liberacao de resgate e publicacao publica;
 - consulta de clientes e pedidos;
 - acompanhamento de onboarding, autenticacao e status operacionais;
 - acompanhamento financeiro;
@@ -84,6 +87,7 @@ Mesmo em fase inicial, o produto ja foi desenhado para reduzir atrito operaciona
 - retaguarda administrativa para publicacao, suporte e conciliacao;
 - publicacao de resultados com controle do que fica publico;
 - conferencia e premiacao desacopladas da venda, reduzindo operacao manual;
+- separacao entre premio identificado e saldo disponivel para resgate;
 - emissao fiscal desacoplada do momento da compra.
 
 ## Modelo Financeiro
@@ -100,11 +104,43 @@ Essa separacao permite acompanhar receita operacional, valores de terceiros, pen
 
 No MVP, a emissao fiscal esta focada na taxa de administracao.
 
+Premiacoes seguem uma trilha propria:
+
+- resultado/conferencia identifica se houve premio;
+- registro financeiro calcula o valor por cota;
+- liberacao administrativa transforma premio identificado em saldo disponivel;
+- cliente solicita resgate com dados bancarios/Pix verificados.
+
 ## Arquitetura em Alto Nivel
 
 Sorterama usa uma arquitetura modular, com separacao entre interface, regras de negocio, integracoes e persistencia.
 
-![Arquitetura em alto nivel do Sorterama](assets/diagrams/arquitetura-fluxo.svg)
+```mermaid
+flowchart LR
+    Cliente["Cliente"]
+    Loja["Loja Web"]
+    Backoffice["Backoffice"]
+    Plataforma["API e Regras de Negocio"]
+    Dados["Banco de Dados"]
+    Fila["Fila Assincrona"]
+    Pagamento["Pagamento Pix"]
+    Fiscal["Emissao Fiscal"]
+    Comunicacao["E-mail e Notificacoes"]
+    Relatorios["Relatorios e Conciliacao"]
+    Resultados["Resultados Publicos"]
+
+    Cliente --> Loja
+    Loja --> Plataforma
+    Backoffice --> Plataforma
+    Plataforma --> Dados
+    Plataforma --> Fila
+    Plataforma --> Pagamento
+    Fila --> Fiscal
+    Plataforma --> Comunicacao
+    Plataforma --> Relatorios
+    Plataforma --> Resultados
+    Resultados --> Loja
+```
 
 ## Integracoes Externas
 
@@ -152,7 +188,7 @@ Com o produto homologado, essa base pode evoluir para relatorios mensais de oper
 
 ## Resultados e Transparencia
 
-A publicacao de resultados passa a ser um eixo de confianca do produto. O backoffice permite registrar o resultado oficial, conferir os boloes, registrar premiacoes e controlar quando essa informacao sera exibida publicamente.
+A publicacao de resultados passa a ser um eixo de confianca do produto. O backoffice permite registrar o resultado oficial, conferir os boloes, registrar premiacoes, liberar resgates e controlar quando essa informacao sera exibida publicamente.
 
 Para o cliente e para o visitante, a loja pode exibir:
 
@@ -163,6 +199,8 @@ Para o cliente e para o visitante, a loja pode exibir:
 - pagina publica de resultados com filtros por modalidade, concurso, periodo e status.
 
 Esse desenho melhora a transparencia sem expor informacoes sensiveis de clientes, pedidos ou pagamentos.
+
+Por compliance, a comunicacao do produto usa a expressao "jogos/participacoes em loterias oficiais" nos textos exibidos, documentos legais e materiais operacionais.
 
 ## Observabilidade
 
@@ -186,7 +224,8 @@ Na revisao atual, o produto ja demonstra:
 - checkout Pix com geracao de chave copia e cola;
 - backoffice para operacao e publicacao;
 - geracao em lote de boloes e concursos;
-- fluxo operacional de resultado, conferencia, premiacao e publicacao publica;
+- cadastro/importacao de jogos/participacoes em loterias oficiais;
+- fluxo operacional de resultado, conferencia, premiacao, liberacao para resgate e publicacao publica;
 - trilha financeira e fiscal desacoplada;
 - documentacao tecnica, plano de testes e guia de setup local para acelerar time e homologacao.
 
