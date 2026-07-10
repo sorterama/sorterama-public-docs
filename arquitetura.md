@@ -2,7 +2,7 @@
 
 Documento publico para investidores, parceiros e stakeholders.
 
-Ultima revisao: 09/07/2026.
+Ultima revisao: 10/07/2026.
 
 ## Visao Geral
 
@@ -113,7 +113,15 @@ Premiacoes seguem uma trilha propria:
 
 ## Arquitetura em Alto Nivel
 
-Sorterama usa uma arquitetura modular, com separacao entre interface, regras de negocio, integracoes e persistencia.
+Sorterama usa uma arquitetura modular orientada a dominios do produto, com separacao entre experiencia do cliente, operacao administrativa, regras de negocio, integracoes externas e registros operacionais.
+
+Essa separacao permite evoluir cada frente sem misturar responsabilidades:
+
+- a loja concentra a experiencia de compra e acompanhamento;
+- o backoffice concentra publicacao, suporte, conciliacao, resultados e resgates;
+- a camada de negocio aplica regras de pagamento, premiacao, compliance e idempotencia;
+- as integracoes externas ficam isoladas, reduzindo dependencia direta de fornecedores;
+- os registros financeiros e operacionais preservam rastreabilidade para suporte, auditoria e analise.
 
 ```mermaid
 flowchart LR
@@ -142,26 +150,71 @@ flowchart LR
     Resultados --> Loja
 ```
 
-## Integracoes Externas
+## Modelo Operacional
 
-No MVP, as integracoes relevantes sao:
+O MVP foi estruturado em ciclos operacionais claros:
 
-- OpenPix/Woovi para pagamento Pix;
-- SendGrid para e-mails transacionais;
-- Zenvia para SMS e WhatsApp;
-- Focus NFe para emissao de nota fiscal de servico;
-- PostgreSQL, Redis e RabbitMQ como base operacional.
+1. o backoffice configura produtos, concursos e boloes;
+2. jogos/participacoes em loterias oficiais sao cadastrados ou importados antes da publicacao;
+3. a loja publica somente ofertas com informacoes coerentes;
+4. o cliente compra cotas ou pacotes e paga por Pix;
+5. a confirmacao de pagamento atualiza pedido, registros financeiros e comunicacoes;
+6. a emissao fiscal da taxa de administracao ocorre de forma desacoplada;
+7. resultados oficiais sao cadastrados apos o concurso;
+8. os jogos dos boloes sao conferidos contra o resultado oficial;
+9. premiacoes sao registradas, calculadas por cota e liberadas para resgate;
+10. resultados publicos sao exibidos sem expor dados sensiveis de clientes, pedidos ou pagamentos.
 
-Essas integracoes ficam encapsuladas, o que facilita substituicao de provider e reduz acoplamento do produto a fornecedores especificos.
+## Publicacao de Boloes
+
+O backoffice permite dois caminhos de publicacao:
+
+- publicacao manual, usada quando o operador cadastra produto, concurso e bolao individualmente;
+- geracao em lote, usada para criar concursos e boloes futuros a partir de modelos configuraveis.
+
+A geracao em lote acelera a preparacao do calendario, mas nao elimina a revisao operacional. Antes de publicar, o operador deve conferir valores, cotas, periodo de vendas, data do sorteio, acumulacao e jogos/participacoes em loterias oficiais vinculados ao bolao.
+
+Essa abordagem evita que ofertas incompletas sejam expostas na loja e cria uma base confiavel para conferencia posterior.
+
+## Jogos, Resultados e Transparencia
+
+Cada bolao pode ter um ou muitos jogos/participacoes em loterias oficiais. Isso prepara a plataforma para jogos simples, combinacoes maiores, fechamentos e desdobramentos.
+
+O ciclo de resultado segue uma separacao importante:
+
+- resultado oficial: dezenas e informacoes publicas do concurso;
+- conferencia: comparacao entre resultado oficial e jogos do bolao;
+- premiacao operacional: faixas, jogos premiados e melhor acerto;
+- premiacao financeira: valor total, valor por cota e saldo por participante;
+- publicacao publica: exibicao controlada para clientes e visitantes.
+
+Essa separacao melhora rastreabilidade, reduz retrabalho e evita que dados financeiros internos sejam publicados indevidamente.
+
+## Premiacao e Resgates
+
+Premiacoes identificadas nao entram automaticamente como saldo disponivel. Primeiro, o backoffice registra a premiacao e calcula o valor por cota. Depois, uma acao administrativa libera o saldo para resgate.
+
+Antes da liberacao:
+
+- o premio fica identificado e aguardando liberacao;
+- o cliente ainda nao consegue solicitar saque daquele valor.
+
+Depois da liberacao:
+
+- o valor aparece como disponivel na area logada;
+- o cliente pode solicitar resgate usando dados bancarios/Pix verificados;
+- a comunicacao informa prazo estimado de 5 a 10 dias uteis apos a liberacao.
+
+Esse desenho reduz risco operacional e cria uma trilha clara entre premio informado, premio recebido e saldo liberado ao cliente.
 
 ## Principios Tecnicos
 
-- Separacao clara entre produto, dominio, infraestrutura e interfaces.
-- Processos criticos assincronos para evitar bloquear o cliente.
-- Integracoes externas encapsuladas por adapters.
-- Rastreabilidade de pedidos, pagamentos e notas fiscais.
-- Base preparada para automacao operacional e analise de dados.
-- Deploy conteinerizado para facilitar evolucao e portabilidade.
+- separacao clara entre produto, operacao, regras de negocio e integracoes;
+- processos criticos desacoplados para reduzir impacto de falhas externas;
+- rastreabilidade de pedidos, pagamentos, notas fiscais, resultados e resgates;
+- idempotencia em webhooks, geracao em lote, conferencia e liberacao de premios;
+- exposicao publica controlada, sem dados sensiveis de clientes ou operacao interna;
+- base preparada para automacao operacional e analise gerencial.
 
 ## Resiliencia Operacional
 
@@ -202,6 +255,8 @@ Esse desenho melhora a transparencia sem expor informacoes sensiveis de clientes
 
 Por compliance, a comunicacao do produto usa a expressao "jogos/participacoes em loterias oficiais" nos textos exibidos, documentos legais e materiais operacionais.
 
+Tambem ha uma diretriz de nao expor publicamente detalhes internos de ambiente, deploy, secrets, endpoints internos, comandos operacionais ou configuracoes tecnicas sensiveis.
+
 ## Observabilidade
 
 O MVP ja considera logs e rastreabilidade como parte da operacao.
@@ -227,7 +282,7 @@ Na revisao atual, o produto ja demonstra:
 - cadastro/importacao de jogos/participacoes em loterias oficiais;
 - fluxo operacional de resultado, conferencia, premiacao, liberacao para resgate e publicacao publica;
 - trilha financeira e fiscal desacoplada;
-- documentacao tecnica, plano de testes e guia de setup local para acelerar time e homologacao.
+- documentacao publica de produto, fluxos operacionais e plano de testes para apoiar homologacao e alinhamento com stakeholders.
 
 ## Evolucao Esperada
 
